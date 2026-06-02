@@ -9,65 +9,79 @@ import { gradeMc } from "../../src/core/grader.js";
 import { recordCompletion } from "../../src/core/streak.js";
 import { recordAnswer } from "../../src/core/topics.js";
 import { isHydrationDue, isQuietHours, nextUnanswered } from "../../src/core/scheduler.js";
-import { validateQuestion } from "../../src/core/schema.js";
 import { createController } from "../../src/main/app-controller.js";
 
-// Deps whose AI backend ALWAYS fails (simulates no key + no Ollama).
-function failingDeps(statePath) {
+const fixedNow = () => new Date("2026-06-02T12:00:00");
+
+function makeQuestions(count, deck = "d") {
+  return Array.from({ length: count }, (_, i) => ({
+    id: `${deck}-${i}`, deck, topic: "T", source: "ai",
+    type: "mc", question: "q", options: ["a", "b", "c", "d"], answerIndex: 0, explanation: "e"
+  }));
+}
+
+function workingDeps(statePath) {
   return {
-    loadState, saveState, statePath, now: () => new Date("2026-06-02T12:00:00"),
+    loadState, saveState, statePath, now: fixedNow,
     loadActiveDecks: async () => [{ deck: "d", mode: "bank", text: "" }],
     buildProvider: () => ({
-      async generateQuestions() { throw new Error("no backend"); },
-      async gradeTyped() { throw new Error("no backend"); },
-      async hint() { throw new Error("no backend"); }
+      async generateQuestions({ count }) { return JSON.stringify(makeQuestions(count)); },
+      async gradeTyped() { return { correct: true, feedback: "" }; },
+      async hint() { return "h"; }
     }),
     generateDailyBatch, gradeMc, recordCompletion, recordAnswer,
     isHydrationDue, isQuietHours, nextUnanswered
   };
 }
 
+function failingDeps(statePath) {
+  return {
+    ...workingDeps(statePath),
+    buildProvider: () => ({
+      async generateQuestions() { throw new Error("no backend"); },
+      async gradeTyped() { throw new Error("no backend"); },
+      async hint() { throw new Error("no backend"); }
+    })
+  };
+}
+
 async function setup(mut) {
-  const dir = await mkdtemp(join(tmpdir(), "papfb-"));
+  const dir = await mkdtemp(join(tmpdir(), "papgen-"));
   const path = join(dir, "state.json");
   const s = defaultState(); mut?.(s);
   await saveState(path, s);
   return { dir, path };
 }
 
-test("ensureTodayBatch falls back to the starter bank when generation fails", async () => {
+test("getNext rejects when no AI backend is available (no bank fallback)", async () => {
   const { dir, path } = await setup();
   const ctl = createController(failingDeps(path));
-  const today = await ctl.ensureTodayBatch();
-  assert.ok(today.batch.length > 0);
-  assert.ok(today.batch.every(q => validateQuestion(q).valid));
+  await assert.rejects(() => ctl.getNext());
+  const state = await loadState(path);
+  assert.equal(state.today.batch.length, 0); // nothing cached as an empty batch
   await rm(dir, { recursive: true, force: true });
 });
 
-test("getNext returns a question in offline fallback mode (never hangs)", async () => {
-  const { dir, path } = await setup();
-  const ctl = createController(failingDeps(path));
+test("endless mode tops up the batch when it's exhausted", async () => {
+  const { dir, path } = await setup(s => { s.settings.questionsPerDay = 2; s.settings.endlessMode = true; });
+  const ctl = createController(workingDeps(path));
+  const today = await ctl.ensureTodayBatch();
+  assert.equal(today.batch.length, 2);
+  await ctl.submitAnswer(today.batch[0].id, { selectedIndex: 0 });
+  await ctl.submitAnswer(today.batch[1].id, { selectedIndex: 0 });
   const q = await ctl.getNext();
-  assert.ok(q && q.id);
+  assert.ok(q && q.id, "expected a topped-up question");
+  const state = await loadState(path);
+  assert.ok(state.today.batch.length > 2, "batch should have grown");
   await rm(dir, { recursive: true, force: true });
 });
 
-test("typed answer grades locally when AI grading throws", async () => {
-  const { dir, path } = await setup(s => { s.settings.answerMode = "typed"; });
-  const ctl = createController(failingDeps(path));
+test("endless mode OFF returns null when exhausted (done for today)", async () => {
+  const { dir, path } = await setup(s => { s.settings.questionsPerDay = 1; s.settings.endlessMode = false; });
+  const ctl = createController(workingDeps(path));
   const today = await ctl.ensureTodayBatch();
-  const typed = today.batch.find(q => q.type === "typed");
-  assert.ok(typed, "expected a typed question in typed-only fallback batch");
-  const r = await ctl.submitAnswer(typed.id, { typedAnswer: typed.answer });
-  assert.equal(r.correct, true);
-  await rm(dir, { recursive: true, force: true });
-});
-
-test("getHint returns a friendly fallback when AI hint throws", async () => {
-  const { dir, path } = await setup();
-  const ctl = createController(failingDeps(path));
-  const today = await ctl.ensureTodayBatch();
-  const hint = await ctl.getHint(today.batch[0].id);
-  assert.ok(typeof hint === "string" && hint.length > 0);
+  await ctl.submitAnswer(today.batch[0].id, { selectedIndex: 0 });
+  const q = await ctl.getNext();
+  assert.equal(q, null);
   await rm(dir, { recursive: true, force: true });
 });

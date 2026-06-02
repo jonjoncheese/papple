@@ -62,6 +62,18 @@ export function parseQuestionsJson(raw, deckName) {
   for (const item of arr) {
     const q = { ...item };
     if (!q.deck) q.deck = deckName;
+    if (!q.source) q.source = "ai";
+    // Smaller models often omit the explanation — backfill a useful default
+    // so otherwise-valid questions aren't dropped.
+    if (!q.explanation) {
+      if (q.type === "mc" && Array.isArray(q.options) && Number.isInteger(q.answerIndex)) {
+        q.explanation = `The correct answer is "${q.options[q.answerIndex]}".`;
+      } else if (q.answer) {
+        q.explanation = `Expected answer: ${q.answer}`;
+      } else {
+        q.explanation = "—";
+      }
+    }
     if (validateQuestion(q).valid) valid.push(q);
   }
   if (valid.length === 0) {

@@ -67,3 +67,14 @@ test("parseQuestionsJson handles a closing bracket inside a string value", () =>
   assert.equal(qs.length, 1);
   assert.equal(qs[0].id, "y");
 });
+
+test("parseQuestionsJson backfills missing explanation + source (small-model output)", () => {
+  // llama3.2-style output: valid question but no explanation/source fields
+  const raw = '[{"id":"z","topic":"Atoms","type":"mc","question":"atomic number of H?",' +
+    '"options":["1","2","3","4"],"answerIndex":0}]';
+  const qs = parseQuestionsJson(raw, "Chemistry");
+  assert.equal(qs.length, 1);
+  assert.equal(qs[0].deck, "Chemistry");
+  assert.equal(qs[0].source, "ai");
+  assert.ok(qs[0].explanation.includes("1"), "explanation backfilled with the correct option");
+});

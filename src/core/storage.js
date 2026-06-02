@@ -9,6 +9,7 @@ export function defaultState() {
       pace: "nudge",
       nudgeIntervalMin: 90,
       questionsPerDay: 10,
+      endlessMode: true,
       quietStartHour: 22,
       quietEndHour: 7,
       hydration: { enabled: true, intervalMin: 60 },

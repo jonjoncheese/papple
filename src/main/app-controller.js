@@ -1,5 +1,4 @@
 import { moodFor } from "./personality.js";
-import { starterBatch } from "./starter-bank.js";
 
 function isoDay(date) {
   const y = date.getFullYear();
@@ -30,39 +29,41 @@ export function createController(deps) {
     isHydrationDue, isQuietHours, nextUnanswered
   } = deps;
 
+  async function generateBatch(settings, topicStats) {
+    const decks = await loadActiveDecks(settings.activeDecks);
+    const provider = buildProvider(effectiveSettings(settings));
+    return generateDailyBatch({
+      decks, provider,
+      count: settings.questionsPerDay,
+      topicStats,
+      answerMode: settings.answerMode
+    });
+  }
+
   async function ensureTodayBatch() {
     const state = await loadState(statePath);
     const today = isoDay(now());
     if (state.today.date === today && state.today.batch.length > 0) return state.today;
-
-    // Try to generate from the active AI backend (Claude, or Ollama if no key).
-    let batch = [];
-    try {
-      const decks = await loadActiveDecks(state.settings.activeDecks);
-      const provider = buildProvider(effectiveSettings(state.settings));
-      batch = await generateDailyBatch({
-        decks, provider,
-        count: state.settings.questionsPerDay,
-        topicStats: state.topicStats,
-        answerMode: state.settings.answerMode
-      });
-    } catch {
-      batch = [];
-    }
-
-    // Final fallback: the built-in offline bank so Papple always has questions.
-    if (!batch || batch.length === 0) {
-      batch = starterBatch(state.settings.questionsPerDay, state.settings.answerMode);
-    }
-
+    // Throws if no AI backend is reachable; the caller surfaces a "set up your AI" message.
+    const batch = await generateBatch(state.settings, state.topicStats);
     state.today = { date: today, batch, progress: {} };
     await saveState(statePath, state);
     return state.today;
   }
 
   async function getNext() {
-    const today = await ensureTodayBatch();
-    return nextUnanswered(today.batch, today.progress);
+    await ensureTodayBatch();
+    const state = await loadState(statePath);
+    let q = nextUnanswered(state.today.batch, state.today.progress);
+    // Endless mode: once the daily batch is exhausted, generate more.
+    if (!q && state.settings.endlessMode) {
+      const more = await generateBatch(state.settings, state.topicStats);
+      const stamp = Date.now();
+      state.today.batch.push(...more.map((m, i) => ({ ...m, id: `${m.id}-x${stamp}-${i}` })));
+      await saveState(statePath, state);
+      q = nextUnanswered(state.today.batch, state.today.progress);
+    }
+    return q;
   }
 
   async function submitAnswer(id, { selectedIndex, typedAnswer } = {}) {
