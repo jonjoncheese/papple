@@ -2,7 +2,7 @@ import { BrowserWindow, screen } from "electron";
 import { join } from "node:path";
 import { rendererDir } from "./paths.js";
 
-const preload = join(rendererDir, "..", "main", "preload.js");
+const preload = join(rendererDir, "..", "main", "preload.cjs");
 
 export function createBuddyWindow() {
   const { workArea } = screen.getPrimaryDisplay();
