@@ -1,4 +1,5 @@
 import { validateQuestion } from "./schema.js";
+import { weakTopics } from "./topics.js";
 
 export function buildGenerationPrompt({ deckName, sourceText, focusTopics = [], count, answerMode }) {
   const modeLine =
@@ -53,4 +54,42 @@ export function parseQuestionsJson(raw, deckName) {
     throw new Error("no valid questions in provider response");
   }
   return valid;
+}
+
+export function distributeCounts(total, n) {
+  const base = Math.floor(total / n);
+  const extra = total % n;
+  return Array.from({ length: n }, (_, i) => base + (i < extra ? 1 : 0));
+}
+
+export async function generateDailyBatch({ decks, provider, count, topicStats, answerMode }) {
+  if (decks.length === 0) throw new Error("no active decks");
+  const counts = distributeCounts(count, decks.length);
+  const focusByDeck = {};
+  for (const w of weakTopics(topicStats, 20)) {
+    (focusByDeck[w.deck] ??= []).push(w.topic);
+  }
+  const batch = [];
+  for (let i = 0; i < decks.length; i++) {
+    const deck = decks[i];
+    const want = counts[i];
+    if (want === 0) continue;
+    try {
+      const raw = await provider.generateQuestions({
+        deckName: deck.deck,
+        sourceText: deck.text,
+        focusTopics: focusByDeck[deck.deck] ?? [],
+        count: want,
+        answerMode
+      });
+      const qs = parseQuestionsJson(raw, deck.deck);
+      batch.push(...qs.slice(0, want));
+    } catch {
+      // skip this deck; other decks may still produce questions
+    }
+  }
+  if (batch.length === 0) {
+    throw new Error("could not generate any questions from active decks");
+  }
+  return batch.slice(0, count);
 }
