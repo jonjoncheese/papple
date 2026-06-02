@@ -255,11 +255,28 @@ configurable via Settings.
 
 ---
 
-## 10. Sellability Notes (later phase, not v1 work)
+## 10. Sellability + Monetization (later phase, not v1 work)
 
 Already designed-in: provider abstraction (Claude / Ollama / future pre-gen
 bank), configurable sources folder, full settings UI, `.exe` packaging. Selling
 later = add licensing + onboarding polish, not a rewrite.
+
+**Monetization model (chica's intent):** freemium.
+- **Free tier** — the Papple buddy + study quizzing works for free, using the
+  user's own AI (bring-your-own Claude API key, or local Ollama). The core
+  experience is free.
+- **Paid tier (subscription OR one-time payment)** — unlocks **unlimited
+  updates** and the broader **general companion** features (the roadmap items:
+  self-researching banks, SAT/ACT/AP exam modes, the wider life-companion
+  layer). Likely also a "managed" option where Papple's questions are generated
+  via a hosted backend so the buyer needs no API key of their own.
+- The provider abstraction already supports the key split here: free = BYO-key /
+  local; paid/managed = hosted generation. Licensing/payment is a post-v1 add,
+  not a rewrite.
+
+No GitHub remote yet — when publishing, create a fresh repo under chica's own
+account (current local commits are authored chicagoyoyo@gmail.com; confirm that
+is chica's before any push).
 
 ---
 
