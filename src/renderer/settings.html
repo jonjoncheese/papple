@@ -1,0 +1,29 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="settings.css"><title>Papple Settings</title></head>
+<body>
+  <h2>🍍 Papple Settings</h2>
+  <label>AI mode</label>
+  <select id="aiMode"><option value="claude">Claude (API key)</option><option value="ollama">Local (Ollama)</option></select>
+  <label>Claude API key</label>
+  <input id="apiKey" type="password" placeholder="sk-ant-…">
+  <div class="row2">
+    <div><label>Questions/day</label><input id="questionsPerDay" type="number" min="1" max="50"></div>
+    <div><label>Answer mode</label>
+      <select id="answerMode"><option value="both">Both</option><option value="mc">Multiple choice</option><option value="typed">Typed</option></select>
+    </div>
+  </div>
+  <div class="row2">
+    <div><label>Pace</label><select id="pace"><option value="nudge">Nudge</option><option value="session">Session</option></select></div>
+    <div><label>Nudge interval (min)</label><input id="nudgeIntervalMin" type="number" min="5"></div>
+  </div>
+  <div class="row2">
+    <div><label>Quiet start (hr)</label><input id="quietStartHour" type="number" min="0" max="23"></div>
+    <div><label>Quiet end (hr)</label><input id="quietEndHour" type="number" min="0" max="23"></div>
+  </div>
+  <label><input id="hydrationEnabled" type="checkbox"> Hydration reminders</label>
+  <label>Hydration interval (min)</label><input id="hydrationIntervalMin" type="number" min="10">
+  <label>Active decks</label>
+  <div id="decks"></div>
+  <button id="save">Save</button><span id="status"></span>
+  <script src="settings.js"></script>
+</body></html>

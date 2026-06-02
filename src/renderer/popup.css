@@ -1,0 +1,14 @@
+html, body { margin: 0; height: 100%; background: transparent; font-family: system-ui, sans-serif; }
+#card { position: absolute; inset: 8px; background: #fffef8; border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3); padding: 16px; display: flex; flex-direction: column; }
+#q { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+.opt { display: block; width: 100%; text-align: left; margin: 6px 0; padding: 10px;
+  border: 2px solid #e5e0cf; border-radius: 10px; background: #fff; cursor: pointer; font-size: 14px; }
+.opt:hover { border-color: #f1c40f; }
+.opt.correct { border-color: #2ecc71; background: #eafaf0; }
+.opt.wrong { border-color: #e74c3c; background: #fdeaea; }
+#typed { width: 100%; padding: 10px; border: 2px solid #e5e0cf; border-radius: 10px; font-size: 14px; }
+#feedback { margin-top: 12px; font-size: 14px; }
+.row { margin-top: auto; display: flex; gap: 8px; }
+button.action { padding: 10px 14px; border: none; border-radius: 10px; background: #f1c40f; cursor: pointer; font-weight: 600; }
+button.ghost { background: #eee; }
