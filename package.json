@@ -3,10 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "main": "src/main/main.js",
   "scripts": {
-    "test": "node --test \"test/**/*.test.js\""
+    "test": "node --test \"test/**/*.test.js\"",
+    "start": "electron ."
   },
   "dependencies": {
     "pdf-parse": "^1.1.1"
+  },
+  "devDependencies": {
+    "electron": "^42.3.2"
   }
 }
