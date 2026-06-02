@@ -7,7 +7,15 @@ let current = null;
 
 async function load() {
   fbEl.textContent = ""; ansEl.innerHTML = ""; nextBtn.style.display = "none"; hintBtn.style.display = "";
-  current = await window.papple.getNext();
+  qEl.textContent = "Loading…";
+  try {
+    current = await window.papple.getNext();
+  } catch (e) {
+    qEl.textContent = "my brain's buffering… 🌀";
+    fbEl.textContent = "Couldn't load questions. Check your AI settings — but the offline bank should normally cover this. (" + (e && e.message ? e.message : "unknown error") + ")";
+    hintBtn.style.display = "none";
+    return;
+  }
   if (!current) { qEl.textContent = "That's all 10 — nice work today! 🍍"; hintBtn.style.display = "none"; return; }
   qEl.textContent = current.question;
   if (current.type === "mc") {

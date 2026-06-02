@@ -1,10 +1,25 @@
 import { moodFor } from "./personality.js";
+import { starterBatch } from "./starter-bank.js";
 
 function isoDay(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
+}
+
+// "Claude if a key is set, otherwise fall back to local Ollama."
+function effectiveSettings(s) {
+  if (s.aiMode === "claude" && !s.apiKey) return { ...s, aiMode: "ollama" };
+  return s;
+}
+
+// Offline grading for typed answers when no AI backend is available.
+function localTypedGrade(expected, given) {
+  const norm = s => String(s ?? "").toLowerCase().replace(/\s+/g, "").replace(/[.,]/g, "");
+  const e = norm(expected), g = norm(given);
+  const correct = g.length > 0 && (g === e || e.includes(g) || g.includes(e));
+  return { correct, feedback: correct ? "correct! 🍍" : `expected: ${expected}` };
 }
 
 export function createController(deps) {
@@ -19,14 +34,27 @@ export function createController(deps) {
     const state = await loadState(statePath);
     const today = isoDay(now());
     if (state.today.date === today && state.today.batch.length > 0) return state.today;
-    const decks = await loadActiveDecks(state.settings.activeDecks);
-    const provider = buildProvider(state.settings);
-    const batch = await generateDailyBatch({
-      decks, provider,
-      count: state.settings.questionsPerDay,
-      topicStats: state.topicStats,
-      answerMode: state.settings.answerMode
-    });
+
+    // Try to generate from the active AI backend (Claude, or Ollama if no key).
+    let batch = [];
+    try {
+      const decks = await loadActiveDecks(state.settings.activeDecks);
+      const provider = buildProvider(effectiveSettings(state.settings));
+      batch = await generateDailyBatch({
+        decks, provider,
+        count: state.settings.questionsPerDay,
+        topicStats: state.topicStats,
+        answerMode: state.settings.answerMode
+      });
+    } catch {
+      batch = [];
+    }
+
+    // Final fallback: the built-in offline bank so Papple always has questions.
+    if (!batch || batch.length === 0) {
+      batch = starterBatch(state.settings.questionsPerDay, state.settings.answerMode);
+    }
+
     state.today = { date: today, batch, progress: {} };
     await saveState(statePath, state);
     return state.today;
@@ -47,8 +75,13 @@ export function createController(deps) {
       const g = gradeMc(q, selectedIndex);
       result = { correct: g.correct, explanation: g.explanation };
     } else {
-      const provider = buildProvider(state.settings);
-      const g = await provider.gradeTyped({ question: q, userAnswer: typedAnswer ?? "" });
+      let g;
+      try {
+        const provider = buildProvider(effectiveSettings(state.settings));
+        g = await provider.gradeTyped({ question: q, userAnswer: typedAnswer ?? "" });
+      } catch {
+        g = localTypedGrade(q.answer, typedAnswer);
+      }
       result = { correct: g.correct, explanation: q.explanation, feedback: g.feedback };
     }
 
@@ -78,8 +111,12 @@ export function createController(deps) {
     const state = await loadState(statePath);
     const q = state.today.batch.find(x => x.id === id);
     if (!q) throw new Error(`unknown question id: ${id}`);
-    const provider = buildProvider(state.settings);
-    return provider.hint({ question: q, sourceText: "" });
+    try {
+      const provider = buildProvider(effectiveSettings(state.settings));
+      return await provider.hint({ question: q, sourceText: "" });
+    } catch {
+      return `Think about the key idea behind "${q.topic}". You've got this 🍍`;
+    }
   }
 
   async function hydrationDue() {
