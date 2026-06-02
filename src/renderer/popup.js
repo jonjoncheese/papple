@@ -56,4 +56,5 @@ function showFeedback(r) {
 
 hintBtn.onclick = async () => { hintBtn.disabled = true; fbEl.textContent = "💡 " + await window.papple.getHint(current.id); hintBtn.disabled = false; };
 nextBtn.onclick = load;
+document.getElementById("close").onclick = () => window.close();
 load();

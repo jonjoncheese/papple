@@ -12,9 +12,10 @@ export function createBuddyWindow() {
     x: workArea.x + workArea.width - w - 20,
     y: workArea.y + workArea.height - h - 20,
     frame: false, transparent: true, resizable: false,
-    alwaysOnTop: true, skipTaskbar: true,
+    alwaysOnTop: true, skipTaskbar: false, title: "Papple",
     webPreferences: { preload, sandbox: false }
   });
+  win.setAlwaysOnTop(true, "screen-saver"); // stay above normal windows
   win.loadFile(join(rendererDir, "buddy.html"));
   return win;
 }
