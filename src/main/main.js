@@ -38,6 +38,20 @@ function openSettings() {
   settingsWin.on("closed", () => { settingsWin = null; });
 }
 
+// Single-instance: a second `npm start` focuses the existing Papple instead of
+// spawning another Electron process.
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on("second-instance", () => {
+    if (buddyWin && !buddyWin.isDestroyed()) {
+      if (buddyWin.isMinimized()) buddyWin.restore();
+      buddyWin.show();
+      buddyWin.focus();
+    }
+  });
+
 app.whenReady().then(async () => {
   const sp = statePath(app);
   const sourcesDir = await ensureSourcesDir();
@@ -73,4 +87,5 @@ app.whenReady().then(async () => {
   ]));
 });
 
-app.on("window-all-closed", () => {}); // keep running in tray
+  app.on("window-all-closed", () => {}); // keep running in tray
+}
