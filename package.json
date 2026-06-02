@@ -1,0 +1,12 @@
+{
+  "name": "papple",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "dependencies": {
+    "pdf-parse": "^1.1.1"
+  }
+}
