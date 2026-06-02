@@ -1,24 +1,29 @@
 # Papple — Design Spec
 
-**Date:** 2026-06-02
+**Date:** 2026-06-02 (revised same day with expanded direction)
 **Owner:** chica
 **Status:** Approved design, pre-implementation
+**Deadline:** Ship a polished, demoable v1 by next week (~2026-06-09) for a
+social-media showcase. Scope is cut hard to hit this; the larger vision is a
+public roadmap teased in the showcase.
 
 ---
 
 ## 1. Summary
 
-Papple is a cute desktop study buddy: a pixel-art pineapple that lives in the
-bottom-right corner of the screen and quizzes the user with **10 questions a
-day** generated from their own school notes. Questions are produced by an AI
-backend reading a folder of source files (PDF + Markdown). The app has a strong
-personality layer — every status, error, and reaction is delivered in-character
-with a matching face/animation. Built on Electron, designed from day one to be
-packaged and sold.
+Papple is a cute desktop **companion** (study-first) — a pixel-art pineapple that
+lives in the bottom-right corner and quizzes the user with **at least 10
+questions a day** so they don't forget what they're studying. Questions come from
+**decks** (per-subject), each fed by either the user's own files or a
+Claude-generated question bank. A strong personality layer delivers every status,
+error, and reaction in-character with a matching face/animation. v1 also includes
+light **hydration/break reminders** to establish the "companion, not just a quiz
+app" identity. Built on Electron, designed from day one to be packaged and sold.
 
-**v1 sources:** the user's existing Honors Chemistry Sem2 and Honors Alg2/Trig
-Sem2 material, seeded into a dedicated `papple-sources` folder. The user adds
-more (e.g. Semester 1) by dropping files into that folder.
+**Content model (mixed):** the user drops real files into per-deck folders; any
+deck with no/thin files uses a Claude-generated bank instead. v1 ships seeded
+with the user's two real Sem2 finals reviews (chem + alg2/trig) plus generated
+banks for the remaining decks.
 
 ---
 
@@ -31,6 +36,9 @@ more (e.g. Semester 1) by dropping files into that folder.
 - User-chosen pace: spread-out nudges OR one quiz session; click Papple to quiz now.
 - Track streak, daily score, and weak topics (bias future questions toward weak topics).
 - Rich personality: in-character lines for every state, plus reactions and mood.
+- **Per-subject decks**, toggleable in Settings; daily questions drawn from active decks.
+- **Mixed content**: user files per deck + Claude-generated banks for gaps.
+- **Hydration/break reminders** (light) to seed the companion identity.
 - Architected to be sellable: pluggable AI provider, configurable folder, settings UI, `.exe` packaging, no hardcoded personal paths.
 
 ### Non-Goals (v1)
@@ -39,6 +47,9 @@ more (e.g. Semester 1) by dropping files into that folder.
 - No mobile version.
 - No licensing/payment system yet (selling is a later phase; v1 just stays clean enough to add it).
 - No spaced-repetition algorithm beyond simple weak-topic weighting.
+- **No self-researching / autonomous bank improvement** (roadmap — §11).
+- **No SAT/ACT/AP exam-mode tailoring** as a dedicated feature (AP appears only as normal decks in v1; roadmap — §11).
+- **No broad life-companion features** beyond study + hydration/break reminders (roadmap — §11).
 
 ---
 
@@ -80,6 +91,8 @@ Speech-bubble styled panel anchored near Papple. Renders the current question:
 - Answer mode: MC / typed / both.
 - Sources folder path (default `…/papple/papple-sources`).
 - Quiet hours (start/end) for sleep mode.
+- **Active decks** — toggle each subject deck on/off.
+- **Hydration/break reminders** — on/off + interval.
 
 ### 4.4 Question engine (provider interface)
 A single interface with swappable backends:
@@ -91,10 +104,21 @@ question count, return validated question JSON. Also grades typed answers
 (returns correct/incorrect + feedback). The provider abstraction is the key
 sellability seam.
 
-### 4.5 Source loader
-Reads the sources folder, parses `.md` and `.pdf` into clean text chunks tagged
-by source filename and (best-effort) topic. Skips files it can't parse (reports
-in-character). Watches the folder for changes.
+### 4.5 Source loader + decks
+The sources folder contains one subfolder per **deck** (subject). The loader
+reads each active deck's files, parses `.md` and `.pdf` into clean text chunks
+tagged by deck + source filename + (best-effort) topic. Skips files it can't
+parse (reports in-character). Watches the folder for changes.
+
+**Deck content resolution (mixed model):**
+- Deck folder has usable files → generate questions from those files.
+- Deck folder empty or thin → use a **Claude-generated bank** for that deck
+  (banks are generated once and stored as files Papple reads like any source).
+
+**v1 decks:** `hc-chem-sem1`, `hc-chem-sem2`, `math-alg2trig-sem1`,
+`math-alg2trig-sem2`, `ap-chem`, `apush`, `ap-chinese`, `ap-seminar`. No APWH.
+Each deck is independently toggled on/off in Settings; the daily 10 are drawn
+across whatever decks are active.
 
 ### 4.6 Grader
 - **MC:** graded instantly and locally against `answerIndex`.
@@ -109,13 +133,20 @@ hint per question.
 
 ### 4.8 Storage
 Single local JSON file:
-- Settings.
+- Settings (incl. active decks, hydration on/off + interval).
 - Streak count + last-completed date.
 - Per-day scores.
 - Per-topic stats (times seen / times missed) → weak-topic weighting.
 - Today's generated question batch + per-question progress (so restarts don't
   regenerate or re-charge the API).
 - Buddy screen position.
+
+### 4.9 Hydration / break reminders
+A light, separate reminder track from quizzing. On an interval (configurable,
+respecting quiet hours), Papple pops a quick in-character nudge ("sip some water
+🥤", "stretch those legs!"). On/off in Settings. Deliberately minimal in v1 — it
+exists to establish the companion identity and demo well, not to be a full
+wellness system. Shares the popup + personality infrastructure with quizzing.
 
 ---
 
@@ -229,3 +260,33 @@ configurable via Settings.
 Already designed-in: provider abstraction (Claude / Ollama / future pre-gen
 bank), configurable sources folder, full settings UI, `.exe` packaging. Selling
 later = add licensing + onboarding polish, not a rewrite.
+
+---
+
+## 11. Roadmap (post-v1 — the showcase teaser)
+
+Deliberately cut from v1 to hit the deadline; these are what Papple grows into:
+- **Self-researching banks** — Papple autonomously researches the web to expand
+  and improve its question banks for a subject over time.
+- **Exam-mode tailoring** — dedicated SAT / ACT / AP exam prep modes (timing,
+  format, scoring that mirrors the real exams) rather than plain decks.
+- **Full life-companion** — reminders/features beyond study + hydration (tasks,
+  encouragement, routines), making Papple an overall daily companion.
+- **Possible Tauri port** if install size matters for distribution.
+
+---
+
+## 12. v1 Delivery Checklist (deadline ~2026-06-09)
+
+- [ ] Custom pixel-art Papple sprite (idle/blink + happy/neutral/sad/sleep + spinny-eyes), designed in visual companion.
+- [ ] Buddy window (transparent, always-on-top, draggable, tray menu).
+- [ ] Quiz popup (MC + typed, feedback, hint).
+- [ ] Question engine w/ ClaudeProvider (default) + OllamaProvider; deck-aware generation.
+- [ ] Source loader + deck resolution (files vs generated bank).
+- [ ] Generated question banks for empty decks (Sem1 chem, Sem1 math, AP Chem, APUSH, AP Chinese, AP Seminar).
+- [ ] Tracking (streak/score/weak-topic) + storage.
+- [ ] Settings UI (key, AI mode, pace, quiet hours, decks, hydration).
+- [ ] Personality layer (all states/reactions/moods) + 4 extras (drag, sleep, idle chatter, hint).
+- [ ] Hydration/break reminders.
+- [ ] Package to `.exe` installer.
+- [ ] Showcase assets (recording Papple in action + roadmap teaser).
