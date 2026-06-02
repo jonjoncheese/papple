@@ -3,11 +3,8 @@ import { join, extname } from "node:path";
 
 export function stripFrontmatter(text) {
   if (text.startsWith("---")) {
-    const end = text.indexOf("\n---", 3);
-    if (end !== -1) {
-      const after = text.indexOf("\n", end + 1);
-      return text.slice(after + 1);
-    }
+    const m = text.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n/);
+    if (m) return text.slice(m[0].length);
   }
   return text;
 }

@@ -48,3 +48,8 @@ test("loadDeckFiles skips files that fail to parse", async () => {
   assert.deepEqual(skipped, [["bad.pdf", "scanned image"]]);
   await rm(dir, { recursive: true, force: true });
 });
+
+test("stripFrontmatter handles CRLF line endings", () => {
+  const md = "---\r\ntags: [a]\r\n---\r\n# Title\r\nbody";
+  assert.equal(stripFrontmatter(md), "# Title\r\nbody");
+});

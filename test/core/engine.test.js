@@ -49,3 +49,21 @@ test("parseQuestionsJson drops invalid items but keeps valid ones", () => {
   assert.equal(qs.length, 1);
   assert.equal(qs[0].id, "y");
 });
+
+test("parseQuestionsJson handles prose with a bracket AFTER the array", () => {
+  const raw = '[{"id":"x","deck":"d","topic":"T","source":"bank","type":"mc",' +
+    '"question":"q","options":["a","b","c","d"],"answerIndex":0,"explanation":"e"}]' +
+    ' Hope that helps — see [the docs] for more.';
+  const qs = parseQuestionsJson(raw, "d");
+  assert.equal(qs.length, 1);
+  assert.equal(qs[0].id, "x");
+});
+
+test("parseQuestionsJson handles a closing bracket inside a string value", () => {
+  const raw = 'Sure: [{"id":"y","deck":"d","topic":"T","source":"bank","type":"mc",' +
+    '"question":"which is [correct]?","options":["a","b","c","d"],"answerIndex":1,' +
+    '"explanation":"e"}]';
+  const qs = parseQuestionsJson(raw, "d");
+  assert.equal(qs.length, 1);
+  assert.equal(qs[0].id, "y");
+});

@@ -62,3 +62,17 @@ test("throws a friendly error when API returns non-ok", async () => {
     /Claude API error 401/
   );
 });
+
+test("gradeTyped returns friendly fallback when model returns no JSON", async () => {
+  const provider = createClaudeProvider({
+    apiKey: "k", model: "m",
+    fetchImpl: (() => {
+      // reuse the local fakeFetch shape: respond with plain prose, no JSON object
+      return async () => ({ ok: true, status: 200,
+        json: async () => ({ content: [{ type: "text", text: "I think it is right!" }] }) });
+    })()
+  });
+  const r = await provider.gradeTyped({ question: { question: "q", answer: "a" }, userAnswer: "a" });
+  assert.equal(r.correct, false);
+  assert.match(r.feedback, /try rephrasing/i);
+});

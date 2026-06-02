@@ -39,8 +39,12 @@ export function createClaudeProvider({ apiKey, model, fetchImpl = globalThis.fet
       ].join("\n");
       const raw = await callClaude({ apiKey, model, fetchImpl, prompt, maxTokens: 256 });
       const start = raw.indexOf("{"), end = raw.lastIndexOf("}");
-      const parsed = JSON.parse(raw.slice(start, end + 1));
-      return { correct: !!parsed.correct, feedback: String(parsed.feedback ?? "") };
+      try {
+        const parsed = JSON.parse(raw.slice(start, end + 1));
+        return { correct: !!parsed.correct, feedback: String(parsed.feedback ?? "") };
+      } catch {
+        return { correct: false, feedback: "Couldn't grade that one — try rephrasing." };
+      }
     },
     async hint({ question, sourceText }) {
       const prompt = [
