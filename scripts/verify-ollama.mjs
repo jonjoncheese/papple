@@ -3,7 +3,9 @@
 import { createOllamaProvider } from "../src/core/providers/ollama.js";
 import { generateDailyBatch } from "../src/core/engine.js";
 
-const provider = createOllamaProvider({ model: "llama3.2" });
+const model = process.argv[2] || "llama3.2";
+const provider = createOllamaProvider({ model });
+console.log(`model: ${model}`);
 const t0 = Date.now();
 try {
   const batch = await generateDailyBatch({

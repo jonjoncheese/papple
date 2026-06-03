@@ -4,6 +4,8 @@ async function init() {
   const s = await window.papple.getSettings();
   $("aiMode").value = s.aiMode;
   $("apiKey").value = s.apiKey || "";
+  $("ollamaModel").value = s.ollamaModel || "qwen2.5:3b";
+  $("endlessMode").checked = s.endlessMode !== false;
   $("questionsPerDay").value = s.questionsPerDay;
   $("answerMode").value = s.answerMode;
   $("pace").value = s.pace;
@@ -32,6 +34,8 @@ $("save").onclick = async () => {
   await window.papple.saveSettings({
     aiMode: $("aiMode").value,
     apiKey: $("apiKey").value,
+    ollamaModel: $("ollamaModel").value,
+    endlessMode: $("endlessMode").checked,
     questionsPerDay: Number($("questionsPerDay").value),
     answerMode: $("answerMode").value,
     pace: $("pace").value,

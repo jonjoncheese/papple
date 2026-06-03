@@ -13,7 +13,7 @@ export function buildProvider(settings, { fetchImpl = globalThis.fetch } = {}) {
   }
   if (settings.aiMode === "ollama") {
     return createOllamaProvider({
-      model: settings.ollamaModel || "llama3.2",
+      model: settings.ollamaModel || "qwen2.5:3b",
       fetchImpl
     });
   }

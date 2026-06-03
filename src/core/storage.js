@@ -15,7 +15,7 @@ export function defaultState() {
       hydration: { enabled: true, intervalMin: 60 },
       aiMode: "claude",
       apiKey: "",
-      ollamaModel: "llama3.2",
+      ollamaModel: "qwen2.5:3b",
       sourcesDir: ""
     },
     streak: { count: 0, lastCompletedDate: null },

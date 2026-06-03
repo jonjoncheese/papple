@@ -4,8 +4,16 @@
   <h2>🍍 Papple Settings</h2>
   <label>AI mode</label>
   <select id="aiMode"><option value="claude">Claude (API key)</option><option value="ollama">Local (Ollama)</option></select>
-  <label>Claude API key</label>
+  <label>Claude API key <span style="font-weight:400;color:#888">(needs API credits — best quality)</span></label>
   <input id="apiKey" type="password" placeholder="sk-ant-…">
+  <label>Local AI model (when no key) <span style="font-weight:400;color:#888">— smaller = faster, bigger = smarter</span></label>
+  <input id="ollamaModel" placeholder="qwen2.5:3b" list="modelList">
+  <datalist id="modelList">
+    <option value="qwen2.5:3b">qwen2.5:3b — fast, fits 8GB GPU</option>
+    <option value="qwen2.5:7b">qwen2.5:7b — smarter, slower on 8GB</option>
+    <option value="llama3.2">llama3.2 — fastest, weakest</option>
+  </datalist>
+  <label><input id="endlessMode" type="checkbox"> Endless mode (keep generating past the daily count)</label>
   <div class="row2">
     <div><label>Questions/day</label><input id="questionsPerDay" type="number" min="1" max="50"></div>
     <div><label>Answer mode</label>
