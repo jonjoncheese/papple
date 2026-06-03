@@ -7,11 +7,7 @@ function isoDay(date) {
   return `${y}-${m}-${d}`;
 }
 
-// "Claude if a key is set, otherwise fall back to local Ollama."
-function effectiveSettings(s) {
-  if (s.aiMode === "claude" && !s.apiKey) return { ...s, aiMode: "ollama" };
-  return s;
-}
+function effectiveSettings(s) { return s; } // (kept for the call site; local fallback removed)
 
 // Offline grading for typed answers when no AI backend is available.
 function localTypedGrade(expected, given) {

@@ -4,19 +4,20 @@ import { dirname } from "node:path";
 export function defaultState() {
   return {
     settings: {
+      onboarded: false,
       activeDecks: [],
       answerMode: "both",
-      pace: "nudge",
+      pace: "session",
       nudgeIntervalMin: 90,
       questionsPerDay: 10,
       endlessMode: true,
       theme: "dark",
       quietStartHour: 22,
       quietEndHour: 7,
-      hydration: { enabled: true, intervalMin: 60 },
-      aiMode: "claude",
+      hydration: { enabled: true, intervalMin: 90 },
+      aiMode: "claude-code",
       apiKey: "",
-      ollamaModel: "qwen2.5:3b",
+      apiModel: "",
       sourcesDir: ""
     },
     streak: { count: 0, lastCompletedDate: null },
