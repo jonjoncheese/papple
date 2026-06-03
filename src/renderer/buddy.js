@@ -1,3 +1,5 @@
+window.papple.getSettings().then(s => { if (s.theme) document.documentElement.dataset.theme = s.theme; }).catch(() => {});
+
 const bubble = document.getElementById("bubble");
 const buddy = document.getElementById("buddy");
 

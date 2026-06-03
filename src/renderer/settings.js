@@ -2,6 +2,9 @@ const $ = id => document.getElementById(id);
 
 async function init() {
   const s = await window.papple.getSettings();
+  $("theme").value = s.theme || "dark";
+  document.documentElement.dataset.theme = s.theme || "dark";
+  $("theme").onchange = () => { document.documentElement.dataset.theme = $("theme").value; };
   $("aiMode").value = s.aiMode;
   $("apiKey").value = s.apiKey || "";
   $("ollamaModel").value = s.ollamaModel || "qwen2.5:3b";
@@ -32,6 +35,7 @@ async function init() {
 $("save").onclick = async () => {
   const decks = [...document.querySelectorAll("#decks input:checked")].map(c => c.value);
   await window.papple.saveSettings({
+    theme: $("theme").value,
     aiMode: $("aiMode").value,
     apiKey: $("apiKey").value,
     ollamaModel: $("ollamaModel").value,

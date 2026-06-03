@@ -1,3 +1,5 @@
+window.papple.getSettings().then(s => { if (s.theme) document.documentElement.dataset.theme = s.theme; }).catch(() => {});
+
 const qEl = document.getElementById("q");
 const ansEl = document.getElementById("answers");
 const fbEl = document.getElementById("feedback");
@@ -7,7 +9,7 @@ let current = null;
 
 async function load() {
   fbEl.textContent = ""; ansEl.innerHTML = ""; nextBtn.style.display = "none"; hintBtn.style.display = "";
-  qEl.textContent = "Loading…";
+  qEl.textContent = "Papple's thinking… 🍍 (Claude can take a few seconds)";
   try {
     current = await window.papple.getNext();
   } catch (e) {

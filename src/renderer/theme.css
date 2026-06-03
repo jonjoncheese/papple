@@ -1,0 +1,35 @@
+/* Papple theme tokens. Default = warm dark; [data-theme="light"] = cream light. */
+:root {
+  --bg: #201d18;
+  --card: #2b2720;
+  --text: #f1ead8;
+  --muted: #b1a78f;
+  --accent: #f4c43c;       /* pineapple yellow */
+  --accent-ink: #2a2310;   /* text on accent */
+  --accent2: #5bbd6e;      /* leaf green */
+  --border: #3d3830;
+  --field: #35302a;
+  --field-border: #4a443a;
+  --correct: #54c47e;
+  --correct-bg: #243a2c;
+  --wrong: #e57a6a;
+  --wrong-bg: #3a2724;
+  --shadow: rgba(0,0,0,.45);
+}
+[data-theme="light"] {
+  --bg: #fdfaf0;
+  --card: #fffefa;
+  --text: #3a3320;
+  --muted: #8a7f63;
+  --accent: #f0b400;
+  --accent-ink: #ffffff;
+  --accent2: #3f9b54;
+  --border: #ece3cc;
+  --field: #ffffff;
+  --field-border: #d9cfb4;
+  --correct: #2ecc71;
+  --correct-bg: #eafaf0;
+  --wrong: #e74c3c;
+  --wrong-bg: #fdeaea;
+  --shadow: rgba(0,0,0,.18);
+}

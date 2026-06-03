@@ -1,0 +1,44 @@
+[
+  {
+    "id": "hc-chem-sem2-rational-va-001",
+    "deck": "hc-chem-sem2",
+    "topic": "Rational Graphs",
+    "source": "source",
+    "type": "mc",
+    "question": "For the function f(x) = x² / (x² − 16), where are the vertical asymptotes?",
+    "options": [
+      "x = 4 and x = −4",
+      "x = 16 and x = −16",
+      "x = 0 only",
+      "x = 2 and x = −2"
+    ],
+    "answerIndex": 0,
+    "explanation": "Vertical asymptotes occur where the denominator equals zero, and x² − 16 = 0 gives x = ±4."
+  },
+  {
+    "id": "hc-chem-sem2-trig-tan390-002",
+    "deck": "hc-chem-sem2",
+    "topic": "Unit Circle / Trig Values",
+    "source": "source",
+    "type": "typed",
+    "question": "Find the exact value of tan(390°).",
+    "answer": "√3/3",
+    "explanation": "390° is coterminal with 30° (390° − 360° = 30°), and tan(30°) = √3/3."
+  },
+  {
+    "id": "hc-chem-sem2-deg-to-rad-003",
+    "deck": "hc-chem-sem2",
+    "topic": "Degree-Radian Conversion",
+    "source": "source",
+    "type": "mc",
+    "question": "Convert −163° to radians, rounded to three decimal places.",
+    "options": [
+      "−2.845",
+      "−1.640",
+      "−9.337",
+      "−0.349"
+    ],
+    "answerIndex": 0,
+    "explanation": "Multiply degrees by π/180: −163 × π/180 ≈ −2.845 radians."
+  }
+]

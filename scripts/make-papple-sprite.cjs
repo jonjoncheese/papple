@@ -33,31 +33,34 @@ function spike(cx, tipY, baseY, halfW, c, cEdge) {
   }
 }
 
-// --- leaf crown (drawn first, body overlaps base) ---
-spike(20, 3, 17, 2.6, C.green, C.greenDark);
-spike(15, 6, 17, 2.5, C.green, C.greenDark);
-spike(25, 6, 17, 2.5, C.green, C.greenDark);
-spike(11, 10, 17, 2.1, C.greenDark);
-spike(29, 10, 17, 2.1, C.greenDark);
-
-// --- feet ---
-ellipse(14, 37, 4, 2.6, C.feet);
-ellipse(26, 37, 4, 2.6, C.feet);
+// --- base + feet (wide base so nothing pokes through the bottom) ---
+ellipse(20, 36.5, 7, 2.3, C.feet);
+ellipse(14, 36, 3.4, 2.5, C.feet);
+ellipse(26, 36, 3.4, 2.5, C.feet);
 
 // --- body ---
-ellipse(20, 26, 11.5, 12, C.body);
+ellipse(20, 25, 11.5, 11.5, C.body);
 // soft shading lower-right
-for (let y = 26; y <= 38; y++) for (let x = 22; x <= 31; x++) {
-  const dx = (x - 20) / 11.5, dy = (y - 26) / 12;
-  if (dx * dx + dy * dy <= 1 && (x - 20) + (y - 26) > 9) set(x, y, C.bodyShade);
+for (let y = 25; y <= 37; y++) for (let x = 22; x <= 31; x++) {
+  const dx = (x - 20) / 11.5, dy = (y - 25) / 11.5;
+  if (dx * dx + dy * dy <= 1 && (x - 20) + (y - 25) > 9) set(x, y, C.bodyShade);
 }
 // faint pineapple diamond texture
-for (let y = 18; y <= 36; y++) for (let x = 11; x <= 29; x++) {
-  const dx = (x - 20) / 11.5, dy = (y - 26) / 12;
-  if (dx * dx + dy * dy <= 0.95 && ((x + y) % 6 === 0 || (x - y + 60) % 6 === 0)) set(x, y, C.bodyShade);
+for (let y = 16; y <= 36; y++) for (let x = 11; x <= 29; x++) {
+  const dx = (x - 20) / 11.5, dy = (y - 25) / 11.5;
+  if (dx * dx + dy * dy <= 0.9 && ((x + y) % 6 === 0 || (x - y + 60) % 6 === 0)) set(x, y, C.bodyShade);
 }
-// sheen highlight
-ellipse(15, 21, 2.4, 3, C.white);
+
+// --- full leaf crown ON TOP of the body, fringing low over the forehead ---
+spike(20, 1, 21, 3.4, C.green, C.greenDark);
+spike(14, 4, 21, 3.2, C.green, C.greenDark);
+spike(26, 4, 21, 3.2, C.green, C.greenDark);
+spike(17, 2, 21, 3.0, C.green);
+spike(23, 2, 21, 3.0, C.green);
+spike(10, 8, 20, 2.8, C.greenDark);
+spike(30, 8, 20, 2.8, C.greenDark);
+// sheen highlight on the body (below the crown)
+ellipse(13, 24, 1.8, 2.2, C.white);
 
 // --- arms ---
 ellipse(9, 28, 3, 3, C.arm);
