@@ -53,11 +53,16 @@ function resetIdle() { wake(); clearTimeout(idleTimer); idleTimer = setTimeout(o
 async function drinkWater() {
   if (busy) return;
   busy = true; wake();
-  say("water break! 🥤", 3500);
+  say("water break! 🥤", 8000);
   setFace("papple-drink.png");
-  for (let i = 0; i < 3; i++) { face.classList.add("gulp"); await delay(280); face.classList.remove("gulp"); await delay(120); }
-  say("ahh~ so refreshing 💧", 2500);
-  setFace("papple-wave.png"); await delay(300); // arm up = wiping his lips
+  await delay(550); // raise the cup
+  for (let i = 0; i < 4; i++) { // slow, deliberate sips
+    face.classList.add("gulp"); await delay(640);
+    face.classList.remove("gulp"); await delay(320);
+  }
+  await delay(350);
+  say("ahh~ so refreshing 💧", 3000);
+  setFace("papple-wave.png"); await delay(600); // arm up = wiping his lips
   setFace("papple.png");
   busy = false; resetIdle();
 }
