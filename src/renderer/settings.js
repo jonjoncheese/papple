@@ -72,6 +72,14 @@ async function init() {
 $("aiMode").onchange = updateApiRow;
 $("theme").onchange = () => applyTheme($("theme").value);
 $("openFolder").onclick = () => window.papple.openSourcesFolder();
+$("resetQ").onclick = async () => {
+  const btn = $("resetQ");
+  btn.disabled = true; $("resetStatus").textContent = "wiping + regenerating…";
+  try { await window.papple.resetQuestions(); $("resetStatus").textContent = "fresh batch ready ✓"; }
+  catch (e) { $("resetStatus").textContent = "failed: " + (e && e.message ? e.message : "error"); }
+  btn.disabled = false;
+  setTimeout(() => $("resetStatus").textContent = "", 3000);
+};
 
 $("save").onclick = async () => {
   const decks = [...document.querySelectorAll("#decks input:checked")].map(c => c.value);

@@ -16,7 +16,7 @@ const fixedNow = () => new Date("2026-06-02T12:00:00");
 function makeQuestions(count, deck = "d") {
   return Array.from({ length: count }, (_, i) => ({
     id: `${deck}-${i}`, deck, topic: "T", source: "ai",
-    type: "mc", question: "q", options: ["a", "b", "c", "d"], answerIndex: 0, explanation: "e"
+    type: "mc", question: `q${i}`, options: ["a", "b", "c", "d"], answerIndex: 0, explanation: "e"
   }));
 }
 

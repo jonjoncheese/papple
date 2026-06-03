@@ -21,7 +21,7 @@ function deps(statePath, extra = {}) {
       async complete() {
         return JSON.stringify(Array.from({ length: 12 }, (_, i) => ({
           id: `q${i}`, deck: "d", topic: "T", source: "bank",
-          type: "mc", question: "q", options: ["a","b","c","d"], answerIndex: 1, explanation: "because"
+          type: "mc", question: `q${i}`, options: ["a","b","c","d"], answerIndex: 1, explanation: "because"
         })));
       },
       async gradeTyped() { return { correct: true, feedback: "good" }; },
@@ -77,7 +77,7 @@ test("submitAnswer on a typed question uses provider.gradeTyped", async () => {
       async complete() {
         return JSON.stringify(Array.from({ length: 3 }, (_, i) => ({
           id: `t${i}`, deck: "d", topic: "T", source: "bank",
-          type: "typed", question: "q", answer: "42", explanation: "e"
+          type: "typed", question: `q${i}`, answer: "42", explanation: "e"
         })));
       },
       async gradeTyped({ userAnswer }) { return { correct: userAnswer === "42", feedback: "f" }; },

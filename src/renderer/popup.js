@@ -33,8 +33,14 @@ async function load() {
   try {
     current = await window.papple.getNext();
   } catch (e) {
+    const msg = (e && e.message ? e.message : "unknown error");
+    // Endless mode that ran into the AI's rate/quota limit: say so, then show the recap.
+    if (endlessOn && /429|quota|rate|RESOURCE_EXHAUSTED|limit/i.test(msg)) {
+      fbEl.textContent = "phew — that's all I can make right now, I hit my AI's limit 🍍 here's how you did:";
+      return renderSummary();
+    }
     qEl.textContent = "my brain's buffering… 🌀";
-    fbEl.textContent = "Couldn't load questions — set up your AI in Settings. (" + (e && e.message ? e.message : "unknown error") + ")";
+    fbEl.textContent = "Couldn't load questions — set up your AI in Settings. (" + msg + ")";
     hintBtn.style.display = "none";
     return;
   }
@@ -130,7 +136,8 @@ endlessBtn.onclick = async () => {
   setEndless(on);
   await window.papple.saveSettings({ endlessMode: on });
   updateProgress();
-  if (on && !current) load(); // we were done → fetch more right away
+  if (on) { if (!current) load(); }      // turned ON while done → fetch more right away
+  else { current = null; renderSummary(); } // turned OFF → done for now, show the recap graph
 };
 nextBtn.onclick = load;
 document.getElementById("close").onclick = () => window.papple.togglePopup();

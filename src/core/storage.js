@@ -23,6 +23,7 @@ export function defaultState() {
     streak: { count: 0, lastCompletedDate: null },
     dailyScores: {},
     topicStats: {},
+    askedRecent: [],
     today: { date: null, batch: [], progress: {} },
     buddyPosition: { x: null, y: null }
   };

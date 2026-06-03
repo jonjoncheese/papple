@@ -27,15 +27,17 @@ export function createController(deps) {
 
   let inFlight = null; // de-dupes concurrent generation (launch pre-gen + a click)
 
-  async function generateBatch(settings, topicStats) {
+  async function generateBatch(settings, topicStats, avoid = []) {
     const decks = await loadActiveDecks(settings.activeDecks);
     const provider = buildProvider(effectiveSettings(settings));
     // ONE provider call for the whole day's batch (subjects split in code).
+    // `avoid` = recently-asked questions, so the AI writes fresh ones (no "bank" feel).
     return generateCombinedBatch({
       decks, provider,
       count: settings.questionsPerDay,
       topicStats,
-      answerMode: settings.answerMode
+      answerMode: settings.answerMode,
+      avoid
     });
   }
 
@@ -47,7 +49,7 @@ export function createController(deps) {
     inFlight = (async () => {
       try {
         // Throws if no AI backend is reachable; caller surfaces a "set up your AI" message.
-        const batch = await generateBatch(state.settings, state.topicStats);
+        const batch = await generateBatch(state.settings, state.topicStats, state.askedRecent || []);
         state.today = { date: today, batch, progress: {} };
         await saveState(statePath, state);
         return state.today;
@@ -62,9 +64,11 @@ export function createController(deps) {
     await ensureTodayBatch();
     const state = await loadState(statePath);
     let q = nextUnanswered(state.today.batch, state.today.progress);
-    // Endless mode: once the daily batch is exhausted, generate more.
+    // Endless mode: once the daily batch is exhausted, generate more — avoiding
+    // both the recent history AND everything already in today's batch.
     if (!q && state.settings.endlessMode) {
-      const more = await generateBatch(state.settings, state.topicStats);
+      const avoid = [...(state.askedRecent || []), ...state.today.batch.map(b => b.question)];
+      const more = await generateBatch(state.settings, state.topicStats, avoid);
       const stamp = Date.now();
       state.today.batch.push(...more.map((m, i) => ({ ...m, id: `${m.id}-x${stamp}-${i}` })));
       await saveState(statePath, state);
@@ -89,6 +93,8 @@ export function createController(deps) {
     }
 
     state.today.progress[id] = { answered: true, correct: result.correct };
+    // Remember what's been asked so future batches don't repeat it (capped, newest-last).
+    state.askedRecent = [...(state.askedRecent || []).filter(t => t !== q.question), q.question].slice(-80);
     const day = state.today.date;
     const score = state.dailyScores[day] ?? { correct: 0, total: 0 };
     state.dailyScores[day] = { correct: score.correct + (result.correct ? 1 : 0), total: score.total + 1 };
@@ -145,6 +151,17 @@ export function createController(deps) {
     };
   }
 
+  // Dev/reset: wipe today's questions AND the asked-question memory, then
+  // regenerate a fresh batch from scratch (proves there's no hidden "bank").
+  async function resetQuestions() {
+    const state = await loadState(statePath);
+    state.today = { date: null, batch: [], progress: {} };
+    state.askedRecent = [];
+    await saveState(statePath, state);
+    await ensureTodayBatch();
+    return { ok: true };
+  }
+
   async function hydrationDue() {
     const state = await loadState(statePath);
     if (!state.settings.hydration?.enabled) return false;
@@ -160,5 +177,5 @@ export function createController(deps) {
     await saveState(statePath, state);
   }
 
-  return { ensureTodayBatch, getNext, submitAnswer, getStatus, getSummary, getHint, hydrationDue, markHydrated };
+  return { ensureTodayBatch, getNext, submitAnswer, getStatus, getSummary, getHint, resetQuestions, hydrationDue, markHydrated };
 }

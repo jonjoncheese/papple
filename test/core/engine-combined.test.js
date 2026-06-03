@@ -20,7 +20,7 @@ test("generateCombinedBatch makes ONE provider.complete call and returns N valid
       calls++;
       return JSON.stringify(Array.from({ length: 10 }, (_, i) => ({
         id: `x${i}`, deck: i < 5 ? "ap-chem" : "apush", topic: "T", source: "ai",
-        type: "mc", question: "q", options: ["a", "b", "c", "d"], answerIndex: 0, explanation: "e", hint: "h"
+        type: "mc", question: `q${i}`, options: ["a", "b", "c", "d"], answerIndex: 0, explanation: "e", hint: "h"
       })));
     }
   };

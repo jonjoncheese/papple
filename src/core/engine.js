@@ -124,7 +124,7 @@ export async function generateDailyBatch({ decks, provider, count, topicStats, a
 
 // Build ONE prompt covering all active subjects (the split computed in code),
 // so the whole daily batch comes back in a single provider call.
-export function buildCombinedPrompt({ decks, counts, answerMode, focusByDeck = {} }) {
+export function buildCombinedPrompt({ decks, counts, answerMode, focusByDeck = {}, avoid = [] }) {
   const modeLine =
     answerMode === "mc" ? "All questions must be multiple choice (mc)." :
     answerMode === "typed" ? "All questions must be typed short-answer (typed)." :
@@ -137,25 +137,44 @@ export function buildCombinedPrompt({ decks, counts, answerMode, focusByDeck = {
       : ` Use your knowledge of the standard "${d.deck}" curriculum.`;
     return `- ${counts[i]} question(s) with deck = "${d.deck}".${focus}${src}`;
   }).join("\n");
+  const avoidLine = avoid.length
+    ? `IMPORTANT — the student has recently seen the questions below. Do NOT repeat or closely paraphrase any of them; write fresh questions on different facts/sub-topics:\n${avoid.slice(-40).map(q => `- ${q}`).join("\n")}`
+    : "";
   return [
     `You are Papple, a study buddy. Generate exactly ${total} quiz questions total, split across these subjects:`,
     deckLines,
     modeLine,
+    `Make all ${total} questions distinct from each other — different facts/sub-topics, no near-duplicates or reworded repeats.`,
+    avoidLine,
     `Return ONLY a single JSON array of all ${total} questions. Each item must have:`,
     `id (unique string), deck (its subject folder name from the list above), topic (short string), source ("ai"), type ("mc" or "typed"), question (string), explanation (string), hint (a one-sentence nudge that does NOT reveal the answer).`,
     `For type "mc": also include options (array of EXACTLY 4 strings) and answerIndex (0-3).`,
     `For type "typed": also include answer (the expected short answer string).`,
     `Quality rules: exactly ONE correct option with the other three clearly wrong; double-check answerIndex; keep questions factually accurate; include hint AND explanation for every item.`,
     `Do not include any prose outside the JSON array.`
-  ].join("\n\n");
+  ].filter(Boolean).join("\n\n");
 }
 
-export async function generateCombinedBatch({ decks, provider, count, topicStats, answerMode }) {
+// Normalize a question to a comparison key so paraphrase-free duplicates are caught.
+function normQuestion(s) { return String(s ?? "").toLowerCase().replace(/[^a-z0-9]+/g, ""); }
+
+export function dedupeQuestions(list, avoid = []) {
+  const seen = new Set(avoid.map(normQuestion));
+  const out = [];
+  for (const q of list) {
+    const k = normQuestion(q.question);
+    if (!k || seen.has(k)) continue;
+    seen.add(k); out.push(q);
+  }
+  return out;
+}
+
+export async function generateCombinedBatch({ decks, provider, count, topicStats, answerMode, avoid = [] }) {
   if (decks.length === 0) throw new Error("no active decks");
   const counts = distributeCounts(count, decks.length);
   const focusByDeck = {};
   for (const w of weakTopics(topicStats, 20)) (focusByDeck[w.deck] ??= []).push(w.topic);
-  const prompt = buildCombinedPrompt({ decks, counts, answerMode, focusByDeck });
+  const prompt = buildCombinedPrompt({ decks, counts, answerMode, focusByDeck, avoid });
   const raw = await provider.complete(prompt);
-  return parseQuestionsJson(raw, decks[0].deck).slice(0, count);
+  return dedupeQuestions(parseQuestionsJson(raw, decks[0].deck), avoid).slice(0, count);
 }

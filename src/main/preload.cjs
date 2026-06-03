@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld("papple", {
   getStatus: () => ipcRenderer.invoke("papple:getStatus"),
   getSummary: () => ipcRenderer.invoke("papple:getSummary"),
   getHint: (id) => ipcRenderer.invoke("papple:getHint", id),
+  resetQuestions: () => ipcRenderer.invoke("papple:resetQuestions"),
   getSettings: () => ipcRenderer.invoke("papple:getSettings"),
   saveSettings: (s) => ipcRenderer.invoke("papple:saveSettings", s),
   listDecks: () => ipcRenderer.invoke("papple:listDecks"),

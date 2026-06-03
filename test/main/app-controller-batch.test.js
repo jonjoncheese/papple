@@ -20,7 +20,7 @@ function makeDeps(overrides = {}) {
       async complete() {
         return JSON.stringify(Array.from({ length: 12 }, (_, i) => ({
           id: `q${i}`, deck: "d", topic: "T", source: "bank",
-          type: "mc", question: "q", options: ["a","b","c","d"], answerIndex: 0, explanation: "e"
+          type: "mc", question: `q${i}`, options: ["a","b","c","d"], answerIndex: 0, explanation: "e"
         })));
       },
       async gradeTyped() { return { correct: true, feedback: "ok" }; },
