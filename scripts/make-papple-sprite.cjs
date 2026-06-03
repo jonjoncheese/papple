@@ -37,27 +37,27 @@ function buildSprite({ wave = false, eyesClosed = false, drink = false, lying = 
   };
   const arc = (cx, cy) => { set(cx - 2, cy - 1, C.black); set(cx - 1, cy, C.black); set(cx, cy, C.black); set(cx + 1, cy, C.black); set(cx + 2, cy - 1, C.black); };
 
-  // ---------- LYING DOWN (sleep) ----------
+  // ---------- SLEEPING: curled-up cozy ball, facing the viewer ----------
   if (lying) {
-    const leafLeft = (tipX, baseX, cy, halfH, c) => {
-      for (let x = tipX; x <= baseX; x++) { const t = (x - tipX) / (baseX - tipX); const half = t * halfH; for (let y = Math.floor(cy - half); y <= cy + half; y++) set(x, y, c); }
-    };
-    // wide low body (lying on back), head-left / feet-right
-    ellipse(22, 31, 12.5, 7.2, C.body);
-    for (let y = 26; y <= 38; y++) for (let x = 22; x <= 34; x++) { const dx = (x - 22) / 12.5, dy = (y - 31) / 7.2; if (dx * dx + dy * dy <= 1 && (y - 31) > 2) set(x, y, C.bodyShade); }
-    // leaf crown fanning LEFT (the head)
-    leafLeft(3, 13, 26, 2.3, C.greenDark);
-    leafLeft(2, 13, 31, 2.7, C.green);
-    leafLeft(3, 13, 36, 2.3, C.greenDark);
-    // feet poking out on the RIGHT
-    ellipse(33, 28, 2.7, 2.1, C.feet);
-    ellipse(33, 34, 2.7, 2.1, C.feet);
-    // sleepy face (looking up), closed ∪ eyes + rosy cheeks + tiny smile
-    arc(19, 29); arc(25, 29);
-    ellipse(17, 32, 2, 1.5, C.cheek); ellipse(27, 32, 2, 1.5, C.cheek);
-    [[20, 32], [21, 32.5], [22, 32.5], [23, 32]].forEach(([x, y]) => set(x, y, C.black));
-    // little resting arm
-    ellipse(15, 26, 2.4, 2, C.arm);
+    // low wide squished body (slumped/curled)
+    ellipse(20, 31, 12.5, 7.5, C.body);
+    for (let y = 31; y <= 39; y++) for (let x = 22; x <= 32; x++) { const dx = (x - 20) / 12.5, dy = (y - 31) / 7.5; if (dx * dx + dy * dy <= 1 && (x - 20) + (y - 31) > 8) set(x, y, C.bodyShade); }
+    // short droopy crown on top
+    spike(19, 17, 25, 2.4, C.green, C.greenDark);
+    spike(15, 19, 25, 2.0, C.green, C.greenDark);
+    spike(23, 19, 25, 2.0, C.green, C.greenDark);
+    spike(12, 21, 25, 1.7, C.greenDark);
+    spike(26, 21, 25, 1.7, C.greenDark);
+    ellipse(12, 30, 1.6, 1.9, C.white);
+    // arms curled up tucked at the front (the cute part)
+    ellipse(15, 34, 2.9, 2.5, C.arm);
+    ellipse(25, 34, 2.9, 2.5, C.arm);
+    // tucked little feet
+    ellipse(18, 38, 2.1, 1.5, C.feet); ellipse(22, 38, 2.1, 1.5, C.feet);
+    // sleepy face — closed ∪ eyes, rosy cheeks, tiny content smile
+    ellipse(13.5, 31, 2, 1.6, C.cheek); ellipse(26.5, 31, 2, 1.6, C.cheek);
+    arc(16, 30); arc(24, 30);
+    [[18, 31], [19, 31.5], [20, 31.7], [21, 31.5], [22, 31]].forEach(([x, y]) => set(x, y, C.black));
     return px;
   }
 
