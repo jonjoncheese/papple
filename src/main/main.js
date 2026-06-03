@@ -1,4 +1,4 @@
-import { app, Tray, Menu } from "electron";
+import { app, Tray, Menu, ipcMain } from "electron";
 import { join } from "node:path";
 import { loadState, saveState } from "../core/storage.js";
 import { generateDailyBatch } from "../core/engine.js";
@@ -26,8 +26,16 @@ async function ensureSourcesDir() {
   return state.settings.sourcesDir;
 }
 
+// Toggle the buddy window's click-through: solid only while the cursor is over
+// Papple himself, so the transparent corner never blocks the rest of the screen.
+ipcMain.on("papple:setIgnore", (_e, ignore) => {
+  if (buddyWin && !buddyWin.isDestroyed()) buddyWin.setIgnoreMouseEvents(ignore, { forward: true });
+});
+
 function openPopup() {
-  if (popupWin && !popupWin.isDestroyed()) { popupWin.focus(); return; }
+  // Always recreate fresh — avoids the transparent-window glitch where it
+  // won't repaint after losing focus.
+  if (popupWin && !popupWin.isDestroyed()) popupWin.destroy();
   popupWin = createPopupWindow();
   popupWin.on("closed", () => { popupWin = null; });
 }

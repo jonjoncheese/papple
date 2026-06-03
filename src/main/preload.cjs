@@ -10,5 +10,6 @@ contextBridge.exposeInMainWorld("papple", {
   listDecks: () => ipcRenderer.invoke("papple:listDecks"),
   openSettings: () => ipcRenderer.invoke("papple:openSettings"),
   openPopup: () => ipcRenderer.invoke("papple:openPopup"),
+  setIgnore: (ignore) => ipcRenderer.send("papple:setIgnore", ignore),
   onHydrate: (cb) => ipcRenderer.on("papple:hydrate", () => cb())
 });

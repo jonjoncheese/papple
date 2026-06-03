@@ -10,6 +10,10 @@ function say(text, ms = 4000) {
   say._t = setTimeout(() => bubble.classList.remove("show"), ms);
 }
 
+// Click-through everywhere except when the cursor is actually over Papple.
+buddy.addEventListener("mouseenter", () => window.papple.setIgnore(false));
+buddy.addEventListener("mouseleave", () => window.papple.setIgnore(true));
+
 buddy.addEventListener("click", () => window.papple.openPopup());
 window.papple.onHydrate(() => say("sip some water 🥤"));
 

@@ -63,7 +63,7 @@ hintBtn.onclick = async () => {
   fbEl.textContent = "💡 thinking of a hint…";
   try { fbEl.textContent = "💡 " + await window.papple.getHint(current.id); }
   catch { fbEl.textContent = "💡 (couldn't get a hint right now)"; }
-  hintBtn.disabled = false;
+  hintBtn.style.display = "none"; // one hint per question
 };
 nextBtn.onclick = load;
 document.getElementById("close").onclick = () => window.close();

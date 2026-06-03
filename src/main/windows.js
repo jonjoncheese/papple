@@ -13,9 +13,11 @@ export function createBuddyWindow() {
     y: workArea.y + workArea.height - h - 20,
     frame: false, transparent: true, resizable: false,
     alwaysOnTop: true, skipTaskbar: false, title: "Papple",
+    focusable: false, hasShadow: false,
     webPreferences: { preload, sandbox: false }
   });
-  win.setAlwaysOnTop(true, "screen-saver"); // stay above normal windows
+  win.setAlwaysOnTop(true, "floating"); // above normal windows, NOT above system UI
+  win.setIgnoreMouseEvents(true, { forward: true }); // click-through except over Papple
   win.loadFile(join(rendererDir, "buddy.html"));
   return win;
 }

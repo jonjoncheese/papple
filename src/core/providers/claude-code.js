@@ -6,7 +6,7 @@ import { buildGenerationPrompt } from "../engine.js";
 
 function defaultRun(prompt, { timeoutMs = 120000 } = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn("claude", ["-p"], { shell: true });
+    const child = spawn("claude", ["-p", "--model", "haiku"], { shell: true });
     let out = "", err = "";
     const timer = setTimeout(() => { child.kill(); reject(new Error("Claude Code timed out")); }, timeoutMs);
     child.stdout.on("data", d => (out += d));

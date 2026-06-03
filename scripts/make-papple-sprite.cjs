@@ -33,13 +33,8 @@ function spike(cx, tipY, baseY, halfW, c, cEdge) {
   }
 }
 
-// --- base + feet (wide base so nothing pokes through the bottom) ---
-ellipse(20, 36.5, 7, 2.3, C.feet);
-ellipse(14, 36, 3.4, 2.5, C.feet);
-ellipse(26, 36, 3.4, 2.5, C.feet);
-
 // --- body ---
-ellipse(20, 25, 11.5, 11.5, C.body);
+ellipse(20, 24.5, 11.5, 11, C.body);
 // soft shading lower-right
 for (let y = 25; y <= 37; y++) for (let x = 22; x <= 31; x++) {
   const dx = (x - 20) / 11.5, dy = (y - 25) / 11.5;
@@ -50,6 +45,10 @@ for (let y = 16; y <= 36; y++) for (let x = 11; x <= 29; x++) {
   const dx = (x - 20) / 11.5, dy = (y - 25) / 11.5;
   if (dx * dx + dy * dy <= 0.9 && ((x + y) % 6 === 0 || (x - y + 60) % 6 === 0)) set(x, y, C.bodyShade);
 }
+
+// --- two separate feet (drawn over the body base; small gap, no merged blob) ---
+ellipse(14.5, 35, 3.4, 2.6, C.feet);
+ellipse(25.5, 35, 3.4, 2.6, C.feet);
 
 // --- leaf crown on top of the body, covering the forehead just a little ---
 spike(20, 5, 18, 2.4, C.green, C.greenDark);
