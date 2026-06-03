@@ -3,7 +3,11 @@
 <body>
   <h2>🍍 Papple Settings</h2>
   <label>AI mode</label>
-  <select id="aiMode"><option value="claude">Claude (API key)</option><option value="ollama">Local (Ollama)</option></select>
+  <select id="aiMode">
+    <option value="claude-code">Claude — via your Claude Code login (no key, best)</option>
+    <option value="claude">Claude (API key)</option>
+    <option value="ollama">Local (Ollama)</option>
+  </select>
   <label>Claude API key <span style="font-weight:400;color:#888">(needs API credits — best quality)</span></label>
   <input id="apiKey" type="password" placeholder="sk-ant-…">
   <label>Local AI model (when no key) <span style="font-weight:400;color:#888">— smaller = faster, bigger = smarter</span></label>
