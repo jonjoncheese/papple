@@ -4,7 +4,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { defaultState, loadState, saveState } from "../../src/core/storage.js";
-import { generateDailyBatch } from "../../src/core/engine.js";
+import { generateCombinedBatch } from "../../src/core/engine.js";
 import { gradeMc } from "../../src/core/grader.js";
 import { recordCompletion } from "../../src/core/streak.js";
 import { recordAnswer } from "../../src/core/topics.js";
@@ -25,11 +25,11 @@ function workingDeps(statePath) {
     loadState, saveState, statePath, now: fixedNow,
     loadActiveDecks: async () => [{ deck: "d", mode: "bank", text: "" }],
     buildProvider: () => ({
-      async generateQuestions({ count }) { return JSON.stringify(makeQuestions(count)); },
+      async complete() { return JSON.stringify(makeQuestions(10)); },
       async gradeTyped() { return { correct: true, feedback: "" }; },
       async hint() { return "h"; }
     }),
-    generateDailyBatch, gradeMc, recordCompletion, recordAnswer,
+    generateCombinedBatch, gradeMc, recordCompletion, recordAnswer,
     isHydrationDue, isQuietHours, nextUnanswered
   };
 }
@@ -38,7 +38,7 @@ function failingDeps(statePath) {
   return {
     ...workingDeps(statePath),
     buildProvider: () => ({
-      async generateQuestions() { throw new Error("no backend"); },
+      async complete() { throw new Error("no backend"); },
       async gradeTyped() { throw new Error("no backend"); },
       async hint() { throw new Error("no backend"); }
     })

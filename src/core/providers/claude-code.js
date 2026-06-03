@@ -27,6 +27,7 @@ function defaultRun(prompt, { timeoutMs = 120000 } = {}) {
 
 export function createClaudeCodeProvider({ run = defaultRun } = {}) {
   return {
+    complete: (prompt) => run(prompt),
     async generateQuestions(opts) {
       return run(buildGenerationPrompt(opts));
     },

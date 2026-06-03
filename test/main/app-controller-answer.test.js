@@ -4,7 +4,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { defaultState, loadState, saveState } from "../../src/core/storage.js";
-import { generateDailyBatch } from "../../src/core/engine.js";
+import { generateCombinedBatch } from "../../src/core/engine.js";
 import { gradeMc } from "../../src/core/grader.js";
 import { recordCompletion } from "../../src/core/streak.js";
 import { recordAnswer } from "../../src/core/topics.js";
@@ -18,8 +18,8 @@ function deps(statePath, extra = {}) {
     loadState, saveState, statePath, now: fixedNow,
     loadActiveDecks: async () => [{ deck: "d", mode: "bank", text: "" }],
     buildProvider: () => ({
-      async generateQuestions({ count }) {
-        return JSON.stringify(Array.from({ length: count }, (_, i) => ({
+      async complete() {
+        return JSON.stringify(Array.from({ length: 12 }, (_, i) => ({
           id: `q${i}`, deck: "d", topic: "T", source: "bank",
           type: "mc", question: "q", options: ["a","b","c","d"], answerIndex: 1, explanation: "because"
         })));
@@ -28,7 +28,7 @@ function deps(statePath, extra = {}) {
       async hint() { return "think harder"; },
       ...extra.provider
     }),
-    generateDailyBatch, gradeMc, recordCompletion, recordAnswer,
+    generateCombinedBatch, gradeMc, recordCompletion, recordAnswer,
     isHydrationDue, isQuietHours, nextUnanswered
   };
 }
@@ -74,8 +74,8 @@ test("submitAnswer on a typed question uses provider.gradeTyped", async () => {
   const ctl = createController({
     ...deps(path),
     buildProvider: () => ({
-      async generateQuestions({ count }) {
-        return JSON.stringify(Array.from({ length: count }, (_, i) => ({
+      async complete() {
+        return JSON.stringify(Array.from({ length: 3 }, (_, i) => ({
           id: `t${i}`, deck: "d", topic: "T", source: "bank",
           type: "typed", question: "q", answer: "42", explanation: "e"
         })));

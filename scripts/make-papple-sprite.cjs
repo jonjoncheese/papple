@@ -64,8 +64,9 @@ function buildSprite({ wave = false, eyesClosed = false } = {}) {
   ellipse(25, 27, 2.2, 1.8, C.cheek);
   // eyes — open dots or closed lines
   if (eyesClosed) {
-    for (let x = 16; x <= 18; x++) { set(x, 24, C.black); set(x, 25, C.black); }
-    for (let x = 22; x <= 24; x++) { set(x, 24, C.black); set(x, 25, C.black); }
+    // gentle ∪ arcs — peaceful closed eyes, not creepy slits
+    const arc = (cx) => { set(cx - 2, 24, C.black); set(cx - 1, 25, C.black); set(cx, 25, C.black); set(cx + 1, 25, C.black); set(cx + 2, 24, C.black); };
+    arc(17); arc(23);
   } else {
     ellipse(17, 24, 1.5, 1.8, C.black);
     ellipse(23, 24, 1.5, 1.8, C.black);
@@ -90,7 +91,7 @@ fs.writeFileSync(out("papple-wave.png"), encode(buildSprite({ wave: true }), W, 
 fs.writeFileSync(out("papple-blink.png"), encode(buildSprite({ eyesClosed: true }), W, H));
 
 // 8x review of the wave frame
-const idle = buildSprite({ wave: true }), S = 8, bw = W * S, bh = H * S, big = Buffer.alloc(bw * bh * 4);
+const idle = buildSprite(), S = 8, bw = W * S, bh = H * S, big = Buffer.alloc(bw * bh * 4);
 for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
   const si = (Math.floor(y / S) * W + Math.floor(x / S)) * 4, di = (y * bw + x) * 4;
   big[di] = idle[si]; big[di + 1] = idle[si + 1]; big[di + 2] = idle[si + 2]; big[di + 3] = idle[si + 3];

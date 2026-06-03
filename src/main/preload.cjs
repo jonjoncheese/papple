@@ -13,5 +13,9 @@ contextBridge.exposeInMainWorld("papple", {
   togglePopup: () => ipcRenderer.send("papple:togglePopup"),
   runAway: () => ipcRenderer.send("papple:runAway"),
   setIgnore: (ignore) => ipcRenderer.send("papple:setIgnore", ignore),
+  dragMove: (pos) => ipcRenderer.send("papple:dragMove", pos),
+  throwAway: (v) => ipcRenderer.send("papple:throw", v),
+  savePos: (pos) => ipcRenderer.send("papple:savePos", pos),
+  onGenStatus: (cb) => ipcRenderer.on("papple:genStatus", (_e, s) => cb(s)),
   onHydrate: (cb) => ipcRenderer.on("papple:hydrate", () => cb())
 });

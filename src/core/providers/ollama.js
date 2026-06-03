@@ -19,9 +19,11 @@ async function callOllama({ host, model, fetchImpl, prompt }) {
 }
 
 export function createOllamaProvider({ model, host = "http://localhost:11434", fetchImpl = globalThis.fetch }) {
+  const complete = (prompt) => callOllama({ host, model, fetchImpl, prompt });
   return {
+    complete,
     async generateQuestions(opts) {
-      return callOllama({ host, model, fetchImpl, prompt: buildGenerationPrompt(opts) });
+      return complete(buildGenerationPrompt(opts));
     },
     async gradeTyped({ question, userAnswer }) {
       const prompt = [

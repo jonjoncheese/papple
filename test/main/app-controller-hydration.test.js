@@ -4,7 +4,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { defaultState, loadState, saveState } from "../../src/core/storage.js";
-import { generateDailyBatch } from "../../src/core/engine.js";
+import { generateCombinedBatch } from "../../src/core/engine.js";
 import { gradeMc } from "../../src/core/grader.js";
 import { recordCompletion } from "../../src/core/streak.js";
 import { recordAnswer } from "../../src/core/topics.js";
@@ -15,8 +15,8 @@ function ctlWith(statePath, nowDate) {
   return createController({
     loadState, saveState, statePath, now: () => nowDate,
     loadActiveDecks: async () => [{ deck: "d", mode: "bank", text: "" }],
-    buildProvider: () => ({ async generateQuestions() { return "[]"; }, async gradeTyped() { return {correct:false,feedback:""}; }, async hint() { return ""; } }),
-    generateDailyBatch, gradeMc, recordCompletion, recordAnswer,
+    buildProvider: () => ({ async complete() { return "[]"; }, async gradeTyped() { return {correct:false,feedback:""}; }, async hint() { return ""; } }),
+    generateCombinedBatch, gradeMc, recordCompletion, recordAnswer,
     isHydrationDue, isQuietHours, nextUnanswered
   });
 }

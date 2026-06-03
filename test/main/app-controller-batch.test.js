@@ -4,7 +4,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { defaultState, loadState, saveState } from "../../src/core/storage.js";
-import { generateDailyBatch } from "../../src/core/engine.js";
+import { generateCombinedBatch } from "../../src/core/engine.js";
 import { gradeMc } from "../../src/core/grader.js";
 import { recordCompletion } from "../../src/core/streak.js";
 import { recordAnswer } from "../../src/core/topics.js";
@@ -17,16 +17,16 @@ function makeDeps(overrides = {}) {
     now: overrides.now ?? (() => new Date("2026-06-02T12:00:00")),
     loadActiveDecks: overrides.loadActiveDecks ?? (async () => [{ deck: "d", mode: "bank", text: "" }]),
     buildProvider: overrides.buildProvider ?? (() => ({
-      async generateQuestions({ deckName, count }) {
-        return JSON.stringify(Array.from({ length: count }, (_, i) => ({
-          id: `${deckName}-${i}`, deck: deckName, topic: "T", source: "bank",
+      async complete() {
+        return JSON.stringify(Array.from({ length: 12 }, (_, i) => ({
+          id: `q${i}`, deck: "d", topic: "T", source: "bank",
           type: "mc", question: "q", options: ["a","b","c","d"], answerIndex: 0, explanation: "e"
         })));
       },
       async gradeTyped() { return { correct: true, feedback: "ok" }; },
       async hint() { return "hint"; }
     })),
-    generateDailyBatch, gradeMc, recordCompletion, recordAnswer,
+    generateCombinedBatch, gradeMc, recordCompletion, recordAnswer,
     isHydrationDue, isQuietHours, nextUnanswered
   };
 }
@@ -47,7 +47,7 @@ test("ensureTodayBatch generates and caches a batch for today", async () => {
   let calls = 0;
   const ctl2 = createController(makeDeps({
     statePath: path,
-    buildProvider: () => ({ async generateQuestions() { calls++; return "[]"; } })
+    buildProvider: () => ({ async complete() { calls++; return "[]"; } })
   }));
   await ctl2.ensureTodayBatch();
   assert.equal(calls, 0);

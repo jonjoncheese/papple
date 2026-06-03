@@ -25,7 +25,7 @@ export function createBuddyWindow() {
 export function createPopupWindow() {
   const win = new BrowserWindow({
     width: 380, height: 460, frame: false, transparent: true,
-    alwaysOnTop: true, resizable: false, skipTaskbar: true,
+    alwaysOnTop: true, resizable: false, skipTaskbar: true, show: false,
     webPreferences: { preload, sandbox: false }
   });
   win.loadFile(join(rendererDir, "popup.html"));

@@ -24,15 +24,18 @@ function localTypedGrade(expected, given) {
 export function createController(deps) {
   const {
     loadState, saveState, statePath, now,
-    loadActiveDecks, buildProvider, generateDailyBatch,
+    loadActiveDecks, buildProvider, generateCombinedBatch,
     gradeMc, recordCompletion, recordAnswer,
     isHydrationDue, isQuietHours, nextUnanswered
   } = deps;
 
+  let inFlight = null; // de-dupes concurrent generation (launch pre-gen + a click)
+
   async function generateBatch(settings, topicStats) {
     const decks = await loadActiveDecks(settings.activeDecks);
     const provider = buildProvider(effectiveSettings(settings));
-    return generateDailyBatch({
+    // ONE provider call for the whole day's batch (subjects split in code).
+    return generateCombinedBatch({
       decks, provider,
       count: settings.questionsPerDay,
       topicStats,
@@ -44,11 +47,19 @@ export function createController(deps) {
     const state = await loadState(statePath);
     const today = isoDay(now());
     if (state.today.date === today && state.today.batch.length > 0) return state.today;
-    // Throws if no AI backend is reachable; the caller surfaces a "set up your AI" message.
-    const batch = await generateBatch(state.settings, state.topicStats);
-    state.today = { date: today, batch, progress: {} };
-    await saveState(statePath, state);
-    return state.today;
+    if (inFlight) return inFlight;
+    inFlight = (async () => {
+      try {
+        // Throws if no AI backend is reachable; caller surfaces a "set up your AI" message.
+        const batch = await generateBatch(state.settings, state.topicStats);
+        state.today = { date: today, batch, progress: {} };
+        await saveState(statePath, state);
+        return state.today;
+      } finally {
+        inFlight = null;
+      }
+    })();
+    return inFlight;
   }
 
   async function getNext() {

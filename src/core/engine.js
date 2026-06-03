@@ -121,3 +121,41 @@ export async function generateDailyBatch({ decks, provider, count, topicStats, a
   }
   return batch.slice(0, count);
 }
+
+// Build ONE prompt covering all active subjects (the split computed in code),
+// so the whole daily batch comes back in a single provider call.
+export function buildCombinedPrompt({ decks, counts, answerMode, focusByDeck = {} }) {
+  const modeLine =
+    answerMode === "mc" ? "All questions must be multiple choice (mc)." :
+    answerMode === "typed" ? "All questions must be typed short-answer (typed)." :
+    "Use a mix of multiple choice (mc) and typed short-answer (typed).";
+  const total = counts.reduce((a, b) => a + b, 0);
+  const deckLines = decks.map((d, i) => {
+    const focus = (focusByDeck[d.deck] ?? []).length ? ` Emphasize weak topics: ${focusByDeck[d.deck].join(", ")}.` : "";
+    const src = d.text && d.text.trim()
+      ? ` Base these ONLY on this source:\n"""\n${d.text}\n"""`
+      : ` Use your knowledge of the standard "${d.deck}" curriculum.`;
+    return `- ${counts[i]} question(s) with deck = "${d.deck}".${focus}${src}`;
+  }).join("\n");
+  return [
+    `You are Papple, a study buddy. Generate exactly ${total} quiz questions total, split across these subjects:`,
+    deckLines,
+    modeLine,
+    `Return ONLY a single JSON array of all ${total} questions. Each item must have:`,
+    `id (unique string), deck (its subject folder name from the list above), topic (short string), source ("ai"), type ("mc" or "typed"), question (string), explanation (string), hint (a one-sentence nudge that does NOT reveal the answer).`,
+    `For type "mc": also include options (array of EXACTLY 4 strings) and answerIndex (0-3).`,
+    `For type "typed": also include answer (the expected short answer string).`,
+    `Quality rules: exactly ONE correct option with the other three clearly wrong; double-check answerIndex; keep questions factually accurate; include hint AND explanation for every item.`,
+    `Do not include any prose outside the JSON array.`
+  ].join("\n\n");
+}
+
+export async function generateCombinedBatch({ decks, provider, count, topicStats, answerMode }) {
+  if (decks.length === 0) throw new Error("no active decks");
+  const counts = distributeCounts(count, decks.length);
+  const focusByDeck = {};
+  for (const w of weakTopics(topicStats, 20)) (focusByDeck[w.deck] ??= []).push(w.topic);
+  const prompt = buildCombinedPrompt({ decks, counts, answerMode, focusByDeck });
+  const raw = await provider.complete(prompt);
+  return parseQuestionsJson(raw, decks[0].deck).slice(0, count);
+}

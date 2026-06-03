@@ -1,7 +1,7 @@
 import { app, Tray, Menu, ipcMain, screen } from "electron";
 import { join } from "node:path";
 import { loadState, saveState } from "../core/storage.js";
-import { generateDailyBatch } from "../core/engine.js";
+import { generateCombinedBatch } from "../core/engine.js";
 import { gradeMc } from "../core/grader.js";
 import { recordCompletion } from "../core/streak.js";
 import { recordAnswer } from "../core/topics.js";
@@ -32,18 +32,27 @@ ipcMain.on("papple:setIgnore", (_e, ignore) => {
   if (buddyWin && !buddyWin.isDestroyed()) buddyWin.setIgnoreMouseEvents(ignore, { forward: true });
 });
 
-function openPopup() {
-  // Always recreate fresh — avoids the transparent-window glitch where it
-  // won't repaint after losing focus.
-  if (popupWin && !popupWin.isDestroyed()) popupWin.destroy();
-  popupWin = createPopupWindow();
-  popupWin.on("closed", () => { popupWin = null; });
+// The quiz window is created once and kept loaded; we just hide/show it so
+// questions + progress persist between opens.
+function ensurePopupWindow() {
+  if (!popupWin || popupWin.isDestroyed()) {
+    popupWin = createPopupWindow();
+    popupWin.on("closed", () => { popupWin = null; });
+  }
+  return popupWin;
 }
 
-// Click Papple to toggle the quiz window open/closed.
+function openPopup() {
+  const win = ensurePopupWindow();
+  win.show();
+  win.focus();
+}
+
+// Click Papple to toggle the quiz window — hides it (keeps it loaded), not destroys.
 function togglePopup() {
-  if (popupWin && !popupWin.isDestroyed()) { popupWin.destroy(); popupWin = null; return; }
-  openPopup();
+  const win = ensurePopupWindow();
+  if (win.isVisible()) win.hide();
+  else { win.show(); win.focus(); }
 }
 
 // Papple dashes across the screen and scurries home (10-rapid-clicks easter egg).
@@ -66,6 +75,52 @@ function runAway() {
 
 ipcMain.on("papple:togglePopup", togglePopup);
 ipcMain.on("papple:runAway", runAway);
+
+// --- grab / drag / throw ---
+ipcMain.on("papple:dragMove", (_e, pos) => {
+  if (buddyWin && !buddyWin.isDestroyed()) buddyWin.setPosition(Math.round(pos.x), Math.round(pos.y));
+});
+
+ipcMain.on("papple:savePos", async (_e, pos) => {
+  const sp = statePath(app);
+  const state = await loadState(sp);
+  state.buddyPosition = { x: Math.round(pos.x), y: Math.round(pos.y) };
+  await saveState(sp, state);
+});
+
+ipcMain.on("papple:throw", (_e, v) => throwAway(v.vx, v.vy));
+
+// Fling Papple along the release velocity (with gravity) until off-screen, then hide to the tray.
+function throwAway(vx, vy) {
+  if (!buddyWin || buddyWin.isDestroyed()) return;
+  const { workArea } = screen.getPrimaryDisplay();
+  const b = buddyWin.getBounds();
+  let x = b.x, y = b.y, dx = vx * 16, dy = vy * 16;
+  const timer = setInterval(() => {
+    if (!buddyWin || buddyWin.isDestroyed()) { clearInterval(timer); return; }
+    dy += 2.4; x += dx; y += dy;
+    buddyWin.setPosition(Math.round(x), Math.round(y));
+    if (x < workArea.x - b.width - 60 || x > workArea.x + workArea.width + 60 || y > workArea.y + workArea.height + 60) {
+      clearInterval(timer);
+      buddyWin.hide();
+    }
+  }, 16);
+}
+
+// Bring Papple back (after a throw) to his saved/corner spot.
+async function showPapple() {
+  if (!buddyWin || buddyWin.isDestroyed()) return;
+  const { workArea } = screen.getPrimaryDisplay();
+  const b = buddyWin.getBounds();
+  let x = workArea.x + workArea.width - b.width - 20, y = workArea.y + workArea.height - b.height - 20;
+  const state = await loadState(statePath(app));
+  if (state.buddyPosition && state.buddyPosition.x != null) {
+    x = Math.min(Math.max(state.buddyPosition.x, workArea.x), workArea.x + workArea.width - b.width);
+    y = Math.min(Math.max(state.buddyPosition.y, workArea.y), workArea.y + workArea.height - b.height);
+  }
+  buddyWin.setPosition(Math.round(x), Math.round(y));
+  buddyWin.show();
+}
 
 function openSettings() {
   if (settingsWin && !settingsWin.isDestroyed()) { settingsWin.focus(); return; }
@@ -97,13 +152,35 @@ app.whenReady().then(async () => {
     loadActiveDecks: (activeDecks) =>
       loadActiveDecks(sourcesDir, activeDecks, { pdfParser: parsePdf, onSkip: (n, e) => console.warn("skip", n, e.message) }),
     buildProvider: (settings) => buildProvider(settings, { fetchImpl: globalThis.fetch }),
-    generateDailyBatch, gradeMc, recordCompletion, recordAnswer,
+    generateCombinedBatch, gradeMc, recordCompletion, recordAnswer,
     isHydrationDue, isQuietHours, nextUnanswered
   });
 
   registerIpc({ controller, statePathStr: sp, sourcesDir, openSettings, openPopup });
 
   buddyWin = createBuddyWindow();
+
+  // Restore where the user last placed him.
+  (async () => {
+    const st = await loadState(sp);
+    if (st.buddyPosition && st.buddyPosition.x != null && buddyWin && !buddyWin.isDestroyed()) {
+      const { workArea } = screen.getPrimaryDisplay();
+      const b = buddyWin.getBounds();
+      const x = Math.min(Math.max(st.buddyPosition.x, workArea.x), workArea.x + workArea.width - b.width);
+      const y = Math.min(Math.max(st.buddyPosition.y, workArea.y), workArea.y + workArea.height - b.height);
+      buddyWin.setPosition(x, y);
+    }
+  })();
+
+  // Start generating today's questions immediately (no click needed); tell the
+  // buddy renderer to show a brewing/ready bubble.
+  buddyWin.webContents.on("did-finish-load", () => {
+    if (buddyWin.isDestroyed()) return;
+    buddyWin.webContents.send("papple:genStatus", "brewing");
+    controller.ensureTodayBatch()
+      .then(() => { if (!buddyWin.isDestroyed()) buddyWin.webContents.send("papple:genStatus", "ready"); })
+      .catch(() => { if (!buddyWin.isDestroyed()) buddyWin.webContents.send("papple:genStatus", "error"); });
+  });
 
   setInterval(async () => {
     if (await controller.hydrationDue()) {
@@ -116,10 +193,12 @@ app.whenReady().then(async () => {
   tray.setToolTip("Papple");
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: "Quiz me now", click: openPopup },
+    { label: "Show Papple 🍍", click: showPapple },
     { label: "Settings", click: openSettings },
     { type: "separator" },
     { label: "Quit", click: () => app.quit() }
   ]));
+  tray.on("click", showPapple); // single-click the tray icon to bring him back
 });
 
   app.on("window-all-closed", () => {}); // keep running in tray

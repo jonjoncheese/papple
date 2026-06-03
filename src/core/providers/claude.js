@@ -26,10 +26,11 @@ async function callClaude({ apiKey, model, fetchImpl, prompt, maxTokens = 4096 }
 }
 
 export function createClaudeProvider({ apiKey, model, fetchImpl = globalThis.fetch }) {
+  const complete = (prompt, maxTokens = 4096) => callClaude({ apiKey, model, fetchImpl, prompt, maxTokens });
   return {
+    complete,
     async generateQuestions(opts) {
-      const prompt = buildGenerationPrompt(opts);
-      return callClaude({ apiKey, model, fetchImpl, prompt });
+      return complete(buildGenerationPrompt(opts));
     },
     async gradeTyped({ question, userAnswer }) {
       const prompt = [
