@@ -3,7 +3,7 @@
 import { buildGenerationPrompt } from "../engine.js";
 
 const BASE = "https://generativelanguage.googleapis.com/v1beta/models";
-const DEFAULT_MODEL = "gemini-2.0-flash";
+const DEFAULT_MODEL = "gemini-2.5-flash"; // 2.0-flash has no free-tier quota on many projects; 2.5-flash does
 
 async function callGemini({ apiKey, model, fetchImpl, prompt }) {
   const url = `${BASE}/${model || DEFAULT_MODEL}:generateContent?key=${apiKey}`;
