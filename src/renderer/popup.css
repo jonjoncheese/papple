@@ -30,3 +30,17 @@ html, body { margin: 0; height: 100%; background: transparent; font-family: var(
 .btn.pill { background: var(--field); color: var(--muted); border-radius: var(--r-pill); font-size: 13px; box-shadow: var(--clay-press); }
 .btn.pill.on { background: var(--accent2); color: var(--accent2-ink); }
 #next { margin-left: auto; }
+
+#answers { flex: 1 1 auto; overflow-y: auto; min-height: 0; }
+.muted { color: var(--muted); font-size: 13px; }
+.recap .score { font-family: var(--font-head); font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+.recap-h { font-family: var(--font-head); font-weight: 700; font-size: 13px; color: var(--accent); margin: 12px 0 6px; }
+.bar-row { display: flex; align-items: center; gap: 8px; margin: 5px 0; font-size: 12px; }
+.bar-label { flex: 0 0 34%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar { flex: 1; height: 12px; background: var(--field); border-radius: var(--r-pill); overflow: hidden; box-shadow: var(--clay-press); }
+.bar-fill { display: block; height: 100%; background: var(--accent2); border-radius: var(--r-pill); }
+.bar-num { flex: 0 0 auto; font-family: var(--font-head); font-weight: 700; color: var(--muted); }
+.miss { background: var(--raised); border-radius: var(--r-btn); padding: 8px 11px; margin: 6px 0; box-shadow: var(--clay-press); }
+.miss-q { font-weight: 700; font-size: 13px; }
+.miss-a { color: var(--correct); font-size: 12px; margin-top: 3px; }
+.miss-e { color: var(--muted); font-size: 12px; margin-top: 2px; line-height: 1.4; }

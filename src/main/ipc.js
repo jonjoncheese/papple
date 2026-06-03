@@ -6,6 +6,7 @@ export function registerIpc({ controller, statePathStr, sourcesDir, openSettings
   ipcMain.handle("papple:getNext", () => controller.getNext());
   ipcMain.handle("papple:submitAnswer", (_e, id, payload) => controller.submitAnswer(id, payload));
   ipcMain.handle("papple:getStatus", () => controller.getStatus());
+  ipcMain.handle("papple:getSummary", () => controller.getSummary());
   ipcMain.handle("papple:getHint", (_e, id) => controller.getHint(id));
   ipcMain.handle("papple:listDecks", async () => {
     const st = await loadState(statePathStr);

@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld("papple", {
   getNext: () => ipcRenderer.invoke("papple:getNext"),
   submitAnswer: (id, payload) => ipcRenderer.invoke("papple:submitAnswer", id, payload),
   getStatus: () => ipcRenderer.invoke("papple:getStatus"),
+  getSummary: () => ipcRenderer.invoke("papple:getSummary"),
   getHint: (id) => ipcRenderer.invoke("papple:getHint", id),
   getSettings: () => ipcRenderer.invoke("papple:getSettings"),
   saveSettings: (s) => ipcRenderer.invoke("papple:saveSettings", s),

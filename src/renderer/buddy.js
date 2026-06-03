@@ -35,7 +35,7 @@ setInterval(() => {
 
 // --- idle → 50/50 sleep or stretch ---
 let idleTimer;
-function sleep() { sleeping = true; document.body.classList.add("sleeping"); setFace("papple-blink.png"); say("💤", 999999); }
+function sleep() { sleeping = true; document.body.classList.add("sleeping"); setFace("papple-sleep.png"); say("💤", 999999); }
 function wake() { if (!sleeping) return; sleeping = false; document.body.classList.remove("sleeping"); setFace("papple.png"); hideBubble(); }
 async function stretch() {
   busy = true;
@@ -48,6 +48,19 @@ async function stretch() {
 }
 function onIdle() { Math.random() < 0.5 ? sleep() : stretch(); }
 function resetIdle() { wake(); clearTimeout(idleTimer); idleTimer = setTimeout(onIdle, 90000); }
+
+// drink-water animation: tilt-sip a few gulps, then wipe his lips
+async function drinkWater() {
+  if (busy) return;
+  busy = true; wake();
+  say("water break! 🥤", 3500);
+  setFace("papple-drink.png");
+  for (let i = 0; i < 3; i++) { face.classList.add("gulp"); await delay(280); face.classList.remove("gulp"); await delay(120); }
+  say("ahh~ so refreshing 💧", 2500);
+  setFace("papple-wave.png"); await delay(300); // arm up = wiping his lips
+  setFace("papple.png");
+  busy = false; resetIdle();
+}
 
 // --- run away after 10 rapid clicks ---
 let clickCount = 0, lastClick = 0;
@@ -107,7 +120,7 @@ buddy.addEventListener("pointerup", (e) => {
 // --- click-through toggle (solid only over Papple) + idle reset ---
 buddy.addEventListener("mouseenter", () => { window.papple.setIgnore(false); resetIdle(); });
 buddy.addEventListener("mouseleave", () => { if (!drag) window.papple.setIgnore(true); });
-window.papple.onHydrate(() => { wake(); say("sip some water 🥤"); });
+window.papple.onHydrate(() => drinkWater());
 
 // --- generation status bubble ---
 let genDone = false;

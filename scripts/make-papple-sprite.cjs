@@ -1,6 +1,6 @@
-// Generates Papple sprite frames (from the Cheeky-Pine plush) as PNGs:
-//   papple.png (idle), papple-wave.png (right arm up), papple-blink.png (eyes closed)
-// plus an 8x review of the idle frame. Pure Node (zlib). Run: node scripts/make-papple-sprite.cjs
+// Papple sprite frames: papple.png (idle), -wave, -blink (quick blink),
+// -drink (sips water), -sleep (lying down comfy). Pure Node (zlib).
+// Run: node scripts/make-papple-sprite.cjs
 const zlib = require("zlib");
 const fs = require("fs");
 const path = require("path");
@@ -10,9 +10,10 @@ const C = {
   body: [246, 200, 60], bodyShade: [225, 175, 45], arm: [250, 216, 104],
   green: [70, 165, 95], greenDark: [48, 130, 72], feet: [236, 150, 52],
   cheek: [246, 168, 172], black: [45, 35, 35], white: [255, 252, 240],
+  cup: [222, 234, 244], water: [118, 196, 226], cupEdge: [150, 180, 200],
 };
 
-function buildSprite({ wave = false, eyesClosed = false } = {}) {
+function buildSprite({ wave = false, eyesClosed = false, drink = false, lying = false } = {}) {
   const px = Buffer.alloc(W * H * 4);
   const set = (x, y, c) => {
     x = Math.round(x); y = Math.round(y);
@@ -34,45 +35,69 @@ function buildSprite({ wave = false, eyesClosed = false } = {}) {
       if (cEdge) set(cx - half, y, cEdge);
     }
   };
+  const arc = (cx, cy) => { set(cx - 2, cy - 1, C.black); set(cx - 1, cy, C.black); set(cx, cy, C.black); set(cx + 1, cy, C.black); set(cx + 2, cy - 1, C.black); };
 
-  // body
+  // ---------- LYING DOWN (sleep) ----------
+  if (lying) {
+    const leafLeft = (tipX, baseX, cy, halfH, c) => {
+      for (let x = tipX; x <= baseX; x++) { const t = (x - tipX) / (baseX - tipX); const half = t * halfH; for (let y = Math.floor(cy - half); y <= cy + half; y++) set(x, y, c); }
+    };
+    // wide low body (lying on back), head-left / feet-right
+    ellipse(22, 31, 12.5, 7.2, C.body);
+    for (let y = 26; y <= 38; y++) for (let x = 22; x <= 34; x++) { const dx = (x - 22) / 12.5, dy = (y - 31) / 7.2; if (dx * dx + dy * dy <= 1 && (y - 31) > 2) set(x, y, C.bodyShade); }
+    // leaf crown fanning LEFT (the head)
+    leafLeft(3, 13, 26, 2.3, C.greenDark);
+    leafLeft(2, 13, 31, 2.7, C.green);
+    leafLeft(3, 13, 36, 2.3, C.greenDark);
+    // feet poking out on the RIGHT
+    ellipse(33, 28, 2.7, 2.1, C.feet);
+    ellipse(33, 34, 2.7, 2.1, C.feet);
+    // sleepy face (looking up), closed ∪ eyes + rosy cheeks + tiny smile
+    arc(19, 29); arc(25, 29);
+    ellipse(17, 32, 2, 1.5, C.cheek); ellipse(27, 32, 2, 1.5, C.cheek);
+    [[20, 32], [21, 32.5], [22, 32.5], [23, 32]].forEach(([x, y]) => set(x, y, C.black));
+    // little resting arm
+    ellipse(15, 26, 2.4, 2, C.arm);
+    return px;
+  }
+
+  // ---------- STANDING (idle / wave / blink / drink) ----------
   ellipse(20, 24.5, 11.5, 11, C.body);
-  for (let y = 25; y <= 37; y++) for (let x = 22; x <= 31; x++) {
-    const dx = (x - 20) / 11.5, dy = (y - 25) / 11.5;
-    if (dx * dx + dy * dy <= 1 && (x - 20) + (y - 25) > 9) set(x, y, C.bodyShade);
-  }
-  for (let y = 16; y <= 36; y++) for (let x = 11; x <= 29; x++) {
-    const dx = (x - 20) / 11.5, dy = (y - 25) / 11.5;
-    if (dx * dx + dy * dy <= 0.9 && ((x + y) % 6 === 0 || (x - y + 60) % 6 === 0)) set(x, y, C.bodyShade);
-  }
-  // two separate feet
+  for (let y = 25; y <= 37; y++) for (let x = 22; x <= 31; x++) { const dx = (x - 20) / 11.5, dy = (y - 25) / 11.5; if (dx * dx + dy * dy <= 1 && (x - 20) + (y - 25) > 9) set(x, y, C.bodyShade); }
+  for (let y = 16; y <= 36; y++) for (let x = 11; x <= 29; x++) { const dx = (x - 20) / 11.5, dy = (y - 25) / 11.5; if (dx * dx + dy * dy <= 0.9 && ((x + y) % 6 === 0 || (x - y + 60) % 6 === 0)) set(x, y, C.bodyShade); }
   ellipse(14.5, 35, 3.4, 2.6, C.feet);
   ellipse(25.5, 35, 3.4, 2.6, C.feet);
-  // leaf crown over the forehead a little
   spike(20, 5, 18, 2.4, C.green, C.greenDark);
   spike(16, 7, 18, 2.2, C.green, C.greenDark);
   spike(24, 7, 18, 2.2, C.green, C.greenDark);
   spike(13, 10, 18, 1.8, C.greenDark);
   spike(27, 10, 18, 1.8, C.greenDark);
   ellipse(13, 23, 1.7, 2.1, C.white);
-  // arms — Papple's right arm (viewer's left) raises for the wave
-  if (wave) ellipse(7, 20, 3, 3.4, C.arm);
+
+  // arms
+  if (drink) ellipse(12, 23, 3, 3, C.arm);      // arm raised holding the cup
+  else if (wave) ellipse(7, 20, 3, 3.4, C.arm); // wave hand up
   else ellipse(9, 28, 3, 3, C.arm);
   ellipse(31, 28, 3, 3, C.arm);
+
   // cheeks
   ellipse(15, 27, 2.2, 1.8, C.cheek);
   ellipse(25, 27, 2.2, 1.8, C.cheek);
-  // eyes — open dots or closed lines
-  if (eyesClosed) {
-    // gentle ∪ arcs — peaceful closed eyes, not creepy slits
-    const arc = (cx) => { set(cx - 2, 24, C.black); set(cx - 1, 25, C.black); set(cx, 25, C.black); set(cx + 1, 25, C.black); set(cx + 2, 24, C.black); };
-    arc(17); arc(23);
+
+  // eyes
+  if (eyesClosed) { arc(17, 25); arc(23, 25); }
+  else { ellipse(17, 24, 1.5, 1.8, C.black); ellipse(23, 24, 1.5, 1.8, C.black); }
+
+  if (drink) {
+    // a cup tilted to the mouth + open "gulp" mouth
+    for (let y = 22; y <= 27; y++) for (let x = 16; x <= 22; x++) set(x, y, C.cup);
+    for (let y = 22; y <= 23; y++) for (let x = 16; x <= 22; x++) set(x, y, C.water);
+    for (let x = 16; x <= 22; x++) { set(x, 22, C.cupEdge); set(x, 27, C.cupEdge); }
+    ellipse(20, 28.5, 1.6, 1.8, C.black); // open mouth
   } else {
-    ellipse(17, 24, 1.5, 1.8, C.black);
-    ellipse(23, 24, 1.5, 1.8, C.black);
+    // smile
+    [[18, 27], [19, 28], [20, 28.4], [21, 28.4], [22, 28], [23, 27]].forEach(([x, y]) => { set(x, y, C.black); set(x, y + 1, C.black); });
   }
-  // smile
-  [[18, 27], [19, 28], [20, 28.4], [21, 28.4], [22, 28], [23, 27]].forEach(([x, y]) => { set(x, y, C.black); set(x, y + 1, C.black); });
   return px;
 }
 
@@ -89,12 +114,14 @@ const out = name => path.join(__dirname, "..", "src", "renderer", name);
 fs.writeFileSync(out("papple.png"), encode(buildSprite(), W, H));
 fs.writeFileSync(out("papple-wave.png"), encode(buildSprite({ wave: true }), W, H));
 fs.writeFileSync(out("papple-blink.png"), encode(buildSprite({ eyesClosed: true }), W, H));
+fs.writeFileSync(out("papple-drink.png"), encode(buildSprite({ drink: true }), W, H));
+fs.writeFileSync(out("papple-sleep.png"), encode(buildSprite({ lying: true }), W, H));
 
-// 8x review of the wave frame
-const idle = buildSprite(), S = 8, bw = W * S, bh = H * S, big = Buffer.alloc(bw * bh * 4);
+// 8x review (change the arg to inspect a frame)
+const review = buildSprite(), S = 8, bw = W * S, bh = H * S, big = Buffer.alloc(bw * bh * 4);
 for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
   const si = (Math.floor(y / S) * W + Math.floor(x / S)) * 4, di = (y * bw + x) * 4;
-  big[di] = idle[si]; big[di + 1] = idle[si + 1]; big[di + 2] = idle[si + 2]; big[di + 3] = idle[si + 3];
+  big[di] = review[si]; big[di + 1] = review[si + 1]; big[di + 2] = review[si + 2]; big[di + 3] = review[si + 3];
 }
 fs.writeFileSync(path.join(__dirname, "papple_review.png"), encode(big, bw, bh));
-console.log("wrote papple.png, papple-wave.png, papple-blink.png + review (wave frame)");
+console.log("wrote idle/wave/blink/drink/sleep frames + review");

@@ -118,6 +118,33 @@ export function createController(deps) {
     return q.hint || `Think about the key idea behind "${q.topic}". You've got this 🍍`;
   }
 
+  // End-of-set recap (NotebookLM-style): score, per-topic + per-source breakdown, and what you missed.
+  async function getSummary() {
+    const state = await loadState(statePath);
+    const batch = state.today.batch || [];
+    const prog = state.today.progress || {};
+    const answered = batch.filter(q => prog[q.id]?.answered);
+    const correct = answered.filter(q => prog[q.id]?.correct).length;
+    const group = (keyFn) => {
+      const m = {};
+      for (const q of answered) {
+        const k = keyFn(q) || "General";
+        (m[k] ??= { name: k, correct: 0, total: 0 });
+        m[k].total++; if (prog[q.id]?.correct) m[k].correct++;
+      }
+      return Object.values(m).sort((a, b) => (a.correct / a.total) - (b.correct / b.total));
+    };
+    const wrong = answered.filter(q => !prog[q.id]?.correct).map(q => ({
+      question: q.question, topic: q.topic, deck: q.deck, source: q.source,
+      answer: q.type === "mc" ? q.options?.[q.answerIndex] : q.answer,
+      explanation: q.explanation
+    }));
+    return {
+      answered: answered.length, correct, total: batch.length,
+      byTopic: group(q => q.topic), bySource: group(q => q.deck || q.source), wrong
+    };
+  }
+
   async function hydrationDue() {
     const state = await loadState(statePath);
     if (!state.settings.hydration?.enabled) return false;
@@ -133,5 +160,5 @@ export function createController(deps) {
     await saveState(statePath, state);
   }
 
-  return { ensureTodayBatch, getNext, submitAnswer, getStatus, getHint, hydrationDue, markHydrated };
+  return { ensureTodayBatch, getNext, submitAnswer, getStatus, getSummary, getHint, hydrationDue, markHydrated };
 }

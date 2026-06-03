@@ -10,7 +10,7 @@ export function defaultState() {
       pace: "session",
       nudgeIntervalMin: 90,
       questionsPerDay: 10,
-      endlessMode: true,
+      endlessMode: false,
       theme: "dark",
       quietStartHour: 22,
       quietEndHour: 7,
