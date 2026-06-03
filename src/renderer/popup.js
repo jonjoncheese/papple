@@ -46,17 +46,25 @@ async function answerMc(btn, idx) {
 }
 
 async function answerTyped(value) {
+  fbEl.textContent = "checking your answer… 🍍";
   const r = await window.papple.submitAnswer(current.id, { typedAnswer: value });
   showFeedback(r);
 }
 
 function showFeedback(r) {
-  fbEl.textContent = (r.correct ? "✅ " : "❌ ") + (r.feedback || r.explanation || "");
+  const detail = r.explanation || r.feedback || "";
+  fbEl.textContent = (r.correct ? "✅ " : "❌ ") + detail;
   hintBtn.style.display = "none";
   nextBtn.style.display = "";
 }
 
-hintBtn.onclick = async () => { hintBtn.disabled = true; fbEl.textContent = "💡 " + await window.papple.getHint(current.id); hintBtn.disabled = false; };
+hintBtn.onclick = async () => {
+  hintBtn.disabled = true;
+  fbEl.textContent = "💡 thinking of a hint…";
+  try { fbEl.textContent = "💡 " + await window.papple.getHint(current.id); }
+  catch { fbEl.textContent = "💡 (couldn't get a hint right now)"; }
+  hintBtn.disabled = false;
+};
 nextBtn.onclick = load;
 document.getElementById("close").onclick = () => window.close();
 load();

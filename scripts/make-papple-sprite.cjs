@@ -51,16 +51,14 @@ for (let y = 16; y <= 36; y++) for (let x = 11; x <= 29; x++) {
   if (dx * dx + dy * dy <= 0.9 && ((x + y) % 6 === 0 || (x - y + 60) % 6 === 0)) set(x, y, C.bodyShade);
 }
 
-// --- full leaf crown ON TOP of the body, fringing low over the forehead ---
-spike(20, 1, 21, 3.4, C.green, C.greenDark);
-spike(14, 4, 21, 3.2, C.green, C.greenDark);
-spike(26, 4, 21, 3.2, C.green, C.greenDark);
-spike(17, 2, 21, 3.0, C.green);
-spike(23, 2, 21, 3.0, C.green);
-spike(10, 8, 20, 2.8, C.greenDark);
-spike(30, 8, 20, 2.8, C.greenDark);
+// --- leaf crown on top of the body, covering the forehead just a little ---
+spike(20, 5, 18, 2.4, C.green, C.greenDark);
+spike(16, 7, 18, 2.2, C.green, C.greenDark);
+spike(24, 7, 18, 2.2, C.green, C.greenDark);
+spike(13, 10, 18, 1.8, C.greenDark);
+spike(27, 10, 18, 1.8, C.greenDark);
 // sheen highlight on the body (below the crown)
-ellipse(13, 24, 1.8, 2.2, C.white);
+ellipse(13, 23, 1.7, 2.1, C.white);
 
 // --- arms ---
 ellipse(9, 28, 3, 3, C.arm);
