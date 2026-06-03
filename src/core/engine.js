@@ -24,6 +24,7 @@ export function buildGenerationPrompt({ deckName, sourceText, focusTopics = [], 
     `id (unique string), deck ("${deckName}"), topic (short string), source ("${sourceText ? "source" : "bank"}"), type ("mc" or "typed"), question (string), explanation (string).`,
     `For type "mc": also include options (array of EXACTLY 4 strings) and answerIndex (0-3).`,
     `For type "typed": also include answer (the expected short answer string).`,
+    `Quality rules: exactly ONE option must be correct and the other three clearly wrong (no "all of the above", no two correct options). Double-check that answerIndex points to the correct option. Keep questions factually accurate and at the level of the ${deckName} course. Always include a one-sentence explanation of why the answer is correct.`,
     `Do not include any prose outside the JSON array.`
   ].filter(Boolean).join("\n\n");
 }

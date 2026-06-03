@@ -6,7 +6,7 @@ async function callOllama({ host, model, fetchImpl, prompt }) {
     res = await fetchImpl(`${host}/api/generate`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ model, prompt, stream: false })
+      body: JSON.stringify({ model, prompt, stream: false, keep_alive: "10m" })
     });
   } catch (err) {
     throw new Error(`Ollama not reachable at ${host}: ${err.message}`);
