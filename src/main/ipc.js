@@ -7,7 +7,10 @@ export function registerIpc({ controller, statePathStr, sourcesDir, openSettings
   ipcMain.handle("papple:submitAnswer", (_e, id, payload) => controller.submitAnswer(id, payload));
   ipcMain.handle("papple:getStatus", () => controller.getStatus());
   ipcMain.handle("papple:getHint", (_e, id) => controller.getHint(id));
-  ipcMain.handle("papple:listDecks", () => listDeckDirs(sourcesDir));
+  ipcMain.handle("papple:listDecks", async () => {
+    const st = await loadState(statePathStr);
+    return listDeckDirs(st.settings.sourcesDir || sourcesDir);
+  });
   ipcMain.handle("papple:getSettings", async () => (await loadState(statePathStr)).settings);
   ipcMain.handle("papple:saveSettings", async (_e, newSettings) => {
     const state = await loadState(statePathStr);

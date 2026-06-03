@@ -1,43 +1,77 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="theme.css"><link rel="stylesheet" href="settings.css"><title>Papple Settings</title></head>
 <body>
-  <h2>🍍 Papple Settings</h2>
-  <label>Theme</label>
-  <select id="theme"><option value="dark">Dark</option><option value="light">Light</option></select>
-  <label>AI mode</label>
-  <select id="aiMode">
-    <option value="claude-code">Claude — via your Claude Code login (no key, best)</option>
-    <option value="claude">Claude (API key)</option>
-    <option value="ollama">Local (Ollama)</option>
-  </select>
-  <label>Claude API key <span style="font-weight:400;color:#888">(needs API credits — best quality)</span></label>
-  <input id="apiKey" type="password" placeholder="sk-ant-…">
-  <label>Local AI model (when no key) <span style="font-weight:400;color:#888">— smaller = faster, bigger = smarter</span></label>
-  <input id="ollamaModel" placeholder="qwen2.5:3b" list="modelList">
-  <datalist id="modelList">
-    <option value="qwen2.5:3b">qwen2.5:3b — fast, fits 8GB GPU</option>
-    <option value="qwen2.5:7b">qwen2.5:7b — smarter, slower on 8GB</option>
-    <option value="llama3.2">llama3.2 — fastest, weakest</option>
-  </datalist>
-  <label><input id="endlessMode" type="checkbox"> Endless mode (keep generating past the daily count)</label>
-  <div class="row2">
-    <div><label>Questions/day</label><input id="questionsPerDay" type="number" min="1" max="50"></div>
-    <div><label>Answer mode</label>
-      <select id="answerMode"><option value="both">Both</option><option value="mc">Multiple choice</option><option value="typed">Typed</option></select>
+  <h1>🍍 Papple Settings</h1>
+
+  <section class="card">
+    <h2>AI brain</h2>
+    <label class="field-label" for="aiMode">How Papple makes your questions</label>
+    <select id="aiMode">
+      <option value="claude-code">Claude login — free, no key (slower)</option>
+      <option value="gemini">Gemini key — free + fast ⚡ (recommended)</option>
+      <option value="openai">OpenAI key — fast (paid)</option>
+      <option value="claude">Claude key — fast (paid)</option>
+    </select>
+    <div id="apiRow">
+      <label class="field-label" for="apiKey">API key</label>
+      <input id="apiKey" type="password" placeholder="paste your key…">
+      <small class="help" id="apiHelp"></small>
+      <label class="field-label" for="apiModel">Model (optional)</label>
+      <input id="apiModel" placeholder="leave blank for the default">
     </div>
-  </div>
-  <div class="row2">
-    <div><label>Pace</label><select id="pace"><option value="nudge">Nudge</option><option value="session">Session</option></select></div>
-    <div><label>Nudge interval (min)</label><input id="nudgeIntervalMin" type="number" min="5"></div>
-  </div>
-  <div class="row2">
-    <div><label>Quiet start (hr)</label><input id="quietStartHour" type="number" min="0" max="23"></div>
-    <div><label>Quiet end (hr)</label><input id="quietEndHour" type="number" min="0" max="23"></div>
-  </div>
-  <label><input id="hydrationEnabled" type="checkbox"> Hydration reminders</label>
-  <label>Hydration interval (min)</label><input id="hydrationIntervalMin" type="number" min="10">
-  <label>Active decks</label>
-  <div id="decks"></div>
-  <button id="save">Save</button><span id="status"></span>
+  </section>
+
+  <section class="card">
+    <h2>Quiz</h2>
+    <div class="row2">
+      <div>
+        <label class="field-label" for="questionsPerDay">Questions per day</label>
+        <input id="questionsPerDay" type="number" min="1" max="50">
+        <small class="help">How many questions Papple gives you each day.</small>
+      </div>
+      <div>
+        <label class="field-label" for="answerMode">Answer style</label>
+        <select id="answerMode"><option value="both">Mix</option><option value="mc">Multiple choice</option><option value="typed">Type the answer</option></select>
+        <small class="help">Pick options, type answers, or a mix of both.</small>
+      </div>
+    </div>
+    <label class="toggle"><input id="endlessMode" type="checkbox"> <span>Endless mode</span></label>
+    <small class="help">Keep getting fresh questions after your daily set is done.</small>
+    <label class="field-label" for="pace">Delivery</label>
+    <select id="pace">
+      <option value="session">All at once — I'll click Papple to start</option>
+      <option value="nudge">One at a time — Papple nudges me</option>
+    </select>
+    <small class="help">Do your whole set in one sitting, or have Papple pop one question up every so often.</small>
+  </section>
+
+  <section class="card">
+    <h2>Reminders</h2>
+    <label class="toggle"><input id="hydrationEnabled" type="checkbox"> <span>Hydration reminders</span></label>
+    <small class="help">Papple reminds you to drink water on a timer — like a buddy looking out for you.</small>
+    <label class="field-label" for="hydrationIntervalMin">Remind me every (minutes)</label>
+    <input id="hydrationIntervalMin" type="number" min="15">
+    <label class="field-label">Quiet hours</label>
+    <small class="help">Papple goes quiet and won't nudge you between these hours (e.g. while you sleep).</small>
+    <div class="row2">
+      <div><label class="field-label" for="quietStartHour">From (0–23)</label><input id="quietStartHour" type="number" min="0" max="23"></div>
+      <div><label class="field-label" for="quietEndHour">Until (0–23)</label><input id="quietEndHour" type="number" min="0" max="23"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Subjects</h2>
+    <small class="help">Your decks are the folders inside your sources folder. Drop notes or PDFs into a folder and Papple quizzes you on them; an empty folder just uses the AI's general knowledge of that subject.</small>
+    <button id="openFolder" class="btn ghost">📁 Open my sources folder</button>
+    <div id="decks"></div>
+  </section>
+
+  <section class="card">
+    <h2>Look</h2>
+    <label class="field-label" for="theme">Theme</label>
+    <select id="theme"><option value="dark">Dark</option><option value="light">Light</option></select>
+  </section>
+
+  <button id="save" class="btn primary">Save</button><span id="status"></span>
   <script src="settings.js"></script>
 </body></html>

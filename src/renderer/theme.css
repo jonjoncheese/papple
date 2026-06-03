@@ -1,35 +1,52 @@
-/* Papple theme tokens. Default = warm dark; [data-theme="light"] = cream light. */
+/* Papple theme — claymorphism, pineapple palette. Default dark; [data-theme="light"] = cream. */
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Comic+Neue:wght@400;700&display=swap');
+
 :root {
-  --bg: #201d18;
-  --card: #2b2720;
-  --text: #f1ead8;
-  --muted: #b1a78f;
-  --accent: #f4c43c;       /* pineapple yellow */
-  --accent-ink: #2a2310;   /* text on accent */
-  --accent2: #5bbd6e;      /* leaf green */
-  --border: #3d3830;
-  --field: #35302a;
-  --field-border: #4a443a;
-  --correct: #54c47e;
-  --correct-bg: #243a2c;
-  --wrong: #e57a6a;
-  --wrong-bg: #3a2724;
+  --font-head: "Baloo 2", system-ui, sans-serif;
+  --font-body: "Comic Neue", "Baloo 2", system-ui, sans-serif;
+
+  /* spacing + shape */
+  --r-card: 22px;
+  --r-btn: 16px;
+  --r-pill: 999px;
+  --sp-1: 6px; --sp-2: 10px; --sp-3: 14px; --sp-4: 20px;
+
+  /* dark (default) */
+  --bg: #211d17;
+  --card: #2c2820;
+  --raised: #353026;
+  --text: #f3ecda;
+  --muted: #b3a98f;
+  --accent: #f6c945;       /* pineapple yellow */
+  --accent-ink: #3a2c08;   /* text on accent */
+  --accent2: #62c777;      /* leaf green */
+  --accent2-ink: #0e2a15;
+  --border: #3e382e;
+  --field: #383228;
+  --field-border: #4d4639;
+  --correct: #5fcf86; --correct-bg: #26402f;
+  --wrong: #ec8273; --wrong-bg: #3d2824;
+  /* clay = soft outer shadow + inner highlight */
+  --clay: 0 6px 0 rgba(0,0,0,.28), 0 12px 26px rgba(0,0,0,.42), inset 0 2px 2px rgba(255,255,255,.06);
+  --clay-press: 0 2px 0 rgba(0,0,0,.28), 0 5px 12px rgba(0,0,0,.4), inset 0 2px 4px rgba(0,0,0,.25);
   --shadow: rgba(0,0,0,.45);
 }
 [data-theme="light"] {
-  --bg: #fdfaf0;
-  --card: #fffefa;
-  --text: #3a3320;
-  --muted: #8a7f63;
-  --accent: #f0b400;
-  --accent-ink: #ffffff;
-  --accent2: #3f9b54;
-  --border: #ece3cc;
-  --field: #ffffff;
-  --field-border: #d9cfb4;
-  --correct: #2ecc71;
-  --correct-bg: #eafaf0;
-  --wrong: #e74c3c;
-  --wrong-bg: #fdeaea;
-  --shadow: rgba(0,0,0,.18);
+  --bg: #fdf7e7;
+  --card: #fffdf6;
+  --raised: #fffaef;
+  --text: #41391f;
+  --muted: #8a7d5c;
+  --accent: #f4bf2c;
+  --accent-ink: #4a3700;
+  --accent2: #3ea257;
+  --accent2-ink: #ffffff;
+  --border: #efe4c6;
+  --field: #fffdf6;
+  --field-border: #e6d9b6;
+  --correct: #2db86d; --correct-bg: #e9faef;
+  --wrong: #e8654f; --wrong-bg: #fdecea;
+  --clay: 0 6px 0 rgba(180,150,70,.18), 0 12px 24px rgba(150,120,40,.18), inset 0 2px 3px rgba(255,255,255,.7);
+  --clay-press: 0 2px 0 rgba(180,150,70,.18), 0 5px 10px rgba(150,120,40,.2), inset 0 2px 5px rgba(170,140,60,.22);
+  --shadow: rgba(120,100,40,.2);
 }

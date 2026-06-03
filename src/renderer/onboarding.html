@@ -1,0 +1,31 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="theme.css"><link rel="stylesheet" href="onboarding.css"><title>Welcome to Papple</title></head>
+<body>
+  <div class="wrap">
+    <img id="pap" src="papple-wave.png" alt="Papple">
+    <h1>hi, i'm Papple! 🍍</h1>
+    <p class="lead">i'm your little study buddy. i live in the corner of your screen and quiz you on your school stuff so you don't forget it.</p>
+
+    <div class="card">
+      <h2>1 · Where are your notes?</h2>
+      <p class="muted">I make questions from a <b>sources folder</b> — each subject is a folder inside it. Drop your notes or PDFs into a folder and I'll quiz you on them.</p>
+      <div id="folderRow">
+        <button id="chooseBtn" class="btn ghost">📁 Choose my folder…</button>
+        <span id="folderPath" class="muted small"></span>
+      </div>
+      <p class="muted small">…or just use the default folder I already set up for you.</p>
+    </div>
+
+    <div class="card">
+      <h2>2 · How should I think?</h2>
+      <p class="muted small">You can change this anytime in Settings:</p>
+      <ul class="muted small">
+        <li><b>Claude login</b> — free, no setup (a little slower).</li>
+        <li><b>Gemini key</b> — free <i>and</i> fast ⚡ (grab a free key at aistudio.google.com/apikey).</li>
+      </ul>
+    </div>
+
+    <button id="start" class="btn primary big">Let's go! 🍍</button>
+  </div>
+  <script src="onboarding.js"></script>
+</body></html>

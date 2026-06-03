@@ -34,9 +34,18 @@ export function createPopupWindow() {
 
 export function createSettingsWindow() {
   const win = new BrowserWindow({
-    width: 460, height: 560, title: "Papple Settings",
+    width: 560, height: 680, title: "Papple Settings",
     webPreferences: { preload, sandbox: false }
   });
   win.loadFile(join(rendererDir, "settings.html"));
+  return win;
+}
+
+export function createOnboardingWindow() {
+  const win = new BrowserWindow({
+    width: 520, height: 600, title: "Welcome to Papple", resizable: false,
+    webPreferences: { preload, sandbox: false }
+  });
+  win.loadFile(join(rendererDir, "onboarding.html"));
   return win;
 }

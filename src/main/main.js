@@ -1,4 +1,4 @@
-import { app, Tray, Menu, ipcMain, screen } from "electron";
+import { app, Tray, Menu, ipcMain, screen, shell, dialog } from "electron";
 import { join } from "node:path";
 import { loadState, saveState } from "../core/storage.js";
 import { generateCombinedBatch } from "../core/engine.js";
@@ -12,9 +12,47 @@ import { loadActiveDecks } from "./decks-loader.js";
 import { parsePdf } from "./pdf.js";
 import { statePath, defaultSourcesDir, rendererDir } from "./paths.js";
 import { registerIpc } from "./ipc.js";
-import { createBuddyWindow, createPopupWindow, createSettingsWindow } from "./windows.js";
+import { createBuddyWindow, createPopupWindow, createSettingsWindow, createOnboardingWindow } from "./windows.js";
 
-let buddyWin, popupWin, settingsWin, tray;
+let buddyWin, popupWin, settingsWin, onboardingWin, tray;
+let controller, statePathStr; // assigned in whenReady; used by module-level IPC handlers
+
+// Kick off today's generation in the background and show a brewing/ready bubble.
+function startGeneration() {
+  if (!buddyWin || buddyWin.isDestroyed() || !controller) return;
+  buddyWin.webContents.send("papple:genStatus", "brewing");
+  controller.ensureTodayBatch()
+    .then(() => { if (buddyWin && !buddyWin.isDestroyed()) buddyWin.webContents.send("papple:genStatus", "ready"); })
+    .catch(() => { if (buddyWin && !buddyWin.isDestroyed()) buddyWin.webContents.send("papple:genStatus", "error"); });
+}
+
+function openOnboarding() {
+  if (onboardingWin && !onboardingWin.isDestroyed()) { onboardingWin.focus(); return; }
+  onboardingWin = createOnboardingWindow();
+  onboardingWin.on("closed", () => { onboardingWin = null; });
+}
+
+ipcMain.on("papple:openSourcesFolder", async () => {
+  const st = await loadState(statePath(app));
+  shell.openPath(st.settings.sourcesDir || defaultSourcesDir());
+});
+
+ipcMain.handle("papple:pickFolder", async () => {
+  const r = await dialog.showOpenDialog({ properties: ["openDirectory", "createDirectory"], title: "Choose your Papple sources folder" });
+  return r.canceled ? null : r.filePaths[0];
+});
+
+ipcMain.handle("papple:finishOnboarding", async (_e, opts = {}) => {
+  const sp = statePath(app);
+  const st = await loadState(sp);
+  if (opts.folder) st.settings.sourcesDir = opts.folder;
+  if (!st.settings.sourcesDir) st.settings.sourcesDir = defaultSourcesDir();
+  st.settings.onboarded = true;
+  await saveState(sp, st);
+  if (onboardingWin && !onboardingWin.isDestroyed()) onboardingWin.close();
+  startGeneration();
+  return true;
+});
 
 async function ensureSourcesDir() {
   const sp = statePath(app);
@@ -146,11 +184,16 @@ app.whenReady().then(async () => {
   const sp = statePath(app);
   const sourcesDir = await ensureSourcesDir();
 
-  const controller = createController({
+  statePathStr = sp;
+  controller = createController({
     loadState, saveState, statePath: sp,
     now: () => new Date(),
-    loadActiveDecks: (activeDecks) =>
-      loadActiveDecks(sourcesDir, activeDecks, { pdfParser: parsePdf, onSkip: (n, e) => console.warn("skip", n, e.message) }),
+    // read the CURRENT sources folder each time (it can change via onboarding/settings)
+    loadActiveDecks: async (activeDecks) => {
+      const st = await loadState(sp);
+      return loadActiveDecks(st.settings.sourcesDir || sourcesDir, activeDecks,
+        { pdfParser: parsePdf, onSkip: (n, e) => console.warn("skip", n, e.message) });
+    },
     buildProvider: (settings) => buildProvider(settings, { fetchImpl: globalThis.fetch }),
     generateCombinedBatch, gradeMc, recordCompletion, recordAnswer,
     isHydrationDue, isQuietHours, nextUnanswered
@@ -172,14 +215,12 @@ app.whenReady().then(async () => {
     }
   })();
 
-  // Start generating today's questions immediately (no click needed); tell the
-  // buddy renderer to show a brewing/ready bubble.
-  buddyWin.webContents.on("did-finish-load", () => {
+  // First run → onboarding; otherwise pre-generate today's questions right away.
+  buddyWin.webContents.on("did-finish-load", async () => {
     if (buddyWin.isDestroyed()) return;
-    buddyWin.webContents.send("papple:genStatus", "brewing");
-    controller.ensureTodayBatch()
-      .then(() => { if (!buddyWin.isDestroyed()) buddyWin.webContents.send("papple:genStatus", "ready"); })
-      .catch(() => { if (!buddyWin.isDestroyed()) buddyWin.webContents.send("papple:genStatus", "error"); });
+    const st = await loadState(sp);
+    if (st.settings.onboarded) startGeneration();
+    else openOnboarding();
   });
 
   setInterval(async () => {

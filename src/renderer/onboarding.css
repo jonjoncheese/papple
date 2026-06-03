@@ -1,0 +1,18 @@
+body { font-family: var(--font-body); background: var(--bg); color: var(--text); margin: 0; }
+.wrap { max-width: 460px; margin: 0 auto; padding: 22px 20px 30px; text-align: center; }
+#pap { width: 92px; image-rendering: pixelated; }
+h1 { font-family: var(--font-head); font-size: 26px; margin: 6px 0; }
+.lead { color: var(--muted); line-height: 1.5; margin: 0 auto 16px; }
+.card { background: var(--card); border-radius: var(--r-card); box-shadow: var(--clay); padding: 16px 18px; margin: 14px 0; text-align: left; }
+h2 { font-family: var(--font-head); font-size: 15px; margin: 0 0 8px; color: var(--accent); }
+.muted { color: var(--muted); line-height: 1.5; margin: 6px 0; }
+.small { font-size: 12px; }
+ul { margin: 6px 0 0; padding-left: 18px; } li { margin: 4px 0; }
+#folderRow { display: flex; align-items: center; gap: 10px; margin: 10px 0 4px; flex-wrap: wrap; }
+#folderPath { word-break: break-all; }
+.btn { border: none; border-radius: var(--r-btn); padding: 10px 16px; cursor: pointer;
+  font-family: var(--font-head); font-weight: 700; font-size: 14px; box-shadow: var(--clay); transition: transform .1s ease, box-shadow .1s ease; }
+.btn:active { transform: translateY(2px); box-shadow: var(--clay-press); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.ghost { background: var(--field); color: var(--text); }
+.btn.big { font-size: 16px; padding: 13px 28px; margin-top: 6px; }

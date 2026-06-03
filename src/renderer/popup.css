@@ -1,21 +1,32 @@
-html, body { margin: 0; height: 100%; background: transparent; font-family: system-ui, sans-serif; }
-#card { position: absolute; inset: 8px; background: var(--card); color: var(--text);
-  border: 1px solid var(--border); border-radius: 16px;
-  box-shadow: 0 10px 28px var(--shadow); padding: 16px; display: flex; flex-direction: column; }
-#close { position: absolute; top: 10px; right: 12px; border: none; background: transparent;
-  font-size: 16px; color: var(--muted); cursor: pointer; line-height: 1; padding: 2px 6px; border-radius: 6px; }
-#close:hover { background: var(--field); color: var(--text); }
-#q { font-size: 16px; font-weight: 600; margin-bottom: 12px; padding-right: 20px; line-height: 1.4; }
-.opt { display: block; width: 100%; text-align: left; margin: 6px 0; padding: 10px;
-  border: 2px solid var(--field-border); border-radius: 10px; background: var(--field); color: var(--text);
-  cursor: pointer; font-size: 14px; transition: border-color .12s; }
-.opt:hover { border-color: var(--accent); }
-.opt.correct { border-color: var(--correct); background: var(--correct-bg); }
-.opt.wrong { border-color: var(--wrong); background: var(--wrong-bg); }
-#typed { width: 100%; box-sizing: border-box; padding: 10px; border: 2px solid var(--field-border);
-  border-radius: 10px; font-size: 14px; background: var(--field); color: var(--text); }
-#feedback { margin-top: 12px; font-size: 14px; line-height: 1.4; }
-.row { margin-top: auto; padding-top: 12px; display: flex; gap: 8px; }
-button.action { padding: 10px 14px; border: none; border-radius: 10px; background: var(--accent);
-  color: var(--accent-ink); cursor: pointer; font-weight: 700; }
-button.ghost { background: var(--field); color: var(--text); border: 1px solid var(--field-border); }
+html, body { margin: 0; height: 100%; background: transparent; font-family: var(--font-body); color: var(--text); }
+#card { position: absolute; inset: 8px; background: var(--card); border-radius: var(--r-card);
+  box-shadow: var(--clay); padding: 16px; display: flex; flex-direction: column; }
+#top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+#progress { font-family: var(--font-head); font-weight: 700; font-size: 13px; color: var(--accent-ink);
+  background: var(--accent); padding: 3px 13px; border-radius: var(--r-pill); }
+#close { border: none; background: var(--field); color: var(--muted); width: 30px; height: 30px;
+  border-radius: 50%; font-size: 14px; cursor: pointer; box-shadow: var(--clay-press); }
+#close:hover { color: var(--text); }
+#q { font-family: var(--font-head); font-weight: 700; font-size: 18px; line-height: 1.35; margin-bottom: 14px; }
+.opt { display: block; width: 100%; text-align: left; margin: 8px 0; padding: 12px 14px;
+  border: none; border-radius: var(--r-btn); background: var(--raised); color: var(--text);
+  cursor: pointer; font-family: var(--font-body); font-weight: 700; font-size: 15px; box-shadow: var(--clay);
+  transition: transform .12s ease, box-shadow .12s ease; }
+.opt:hover { transform: translateY(-2px); }
+.opt:active { transform: translateY(2px); box-shadow: var(--clay-press); }
+.opt.correct { background: var(--correct-bg); box-shadow: 0 0 0 3px var(--correct), var(--clay); }
+.opt.wrong { background: var(--wrong-bg); box-shadow: 0 0 0 3px var(--wrong), var(--clay); }
+#typed { width: 100%; box-sizing: border-box; padding: 12px 14px; border: none; border-radius: var(--r-btn);
+  background: var(--field); color: var(--text); font-family: var(--font-body); font-size: 15px; box-shadow: var(--clay-press); }
+#typed:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+#feedback { margin-top: 12px; font-size: 14px; line-height: 1.45; }
+.row { margin-top: auto; padding-top: 14px; display: flex; gap: 8px; align-items: center; }
+.btn { border: none; border-radius: var(--r-btn); padding: 10px 14px; cursor: pointer;
+  font-family: var(--font-head); font-weight: 700; font-size: 14px; box-shadow: var(--clay);
+  transition: transform .1s ease, box-shadow .1s ease; }
+.btn:active { transform: translateY(2px); box-shadow: var(--clay-press); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.ghost { background: var(--field); color: var(--text); }
+.btn.pill { background: var(--field); color: var(--muted); border-radius: var(--r-pill); font-size: 13px; box-shadow: var(--clay-press); }
+.btn.pill.on { background: var(--accent2); color: var(--accent2-ink); }
+#next { margin-left: auto; }

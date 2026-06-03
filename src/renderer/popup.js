@@ -1,24 +1,40 @@
-window.papple.getSettings().then(s => { if (s.theme) document.documentElement.dataset.theme = s.theme; }).catch(() => {});
-
 const qEl = document.getElementById("q");
 const ansEl = document.getElementById("answers");
 const fbEl = document.getElementById("feedback");
 const nextBtn = document.getElementById("next");
 const hintBtn = document.getElementById("hint");
+const endlessBtn = document.getElementById("endless");
+const progressEl = document.getElementById("progress");
 let current = null;
+let qPerDay = 10;
+
+(async () => {
+  const s = await window.papple.getSettings().catch(() => ({}));
+  if (s.theme) document.documentElement.dataset.theme = s.theme;
+  qPerDay = s.questionsPerDay || 10;
+  setEndless(!!s.endlessMode);
+})();
+
+function setEndless(on) { endlessBtn.classList.toggle("on", on); endlessBtn.dataset.on = on ? "1" : ""; }
+
+async function updateProgress() {
+  try { const st = await window.papple.getStatus(); progressEl.textContent = `${st.today.total} / ${qPerDay}`; }
+  catch { /* leave as-is */ }
+}
 
 async function load() {
   fbEl.textContent = ""; ansEl.innerHTML = ""; nextBtn.style.display = "none"; hintBtn.style.display = "";
-  qEl.textContent = "Papple's thinking… 🍍 (Claude can take a few seconds)";
+  qEl.textContent = "Loading your questions… 🍍";
   try {
     current = await window.papple.getNext();
   } catch (e) {
     qEl.textContent = "my brain's buffering… 🌀";
-    fbEl.textContent = "Couldn't load questions. Check your AI settings — but the offline bank should normally cover this. (" + (e && e.message ? e.message : "unknown error") + ")";
+    fbEl.textContent = "Couldn't load questions — set up your AI in Settings. (" + (e && e.message ? e.message : "unknown error") + ")";
     hintBtn.style.display = "none";
     return;
   }
-  if (!current) { qEl.textContent = "That's all 10 — nice work today! 🍍"; hintBtn.style.display = "none"; return; }
+  await updateProgress();
+  if (!current) { qEl.textContent = "That's all for today — nice work! 🍍 (flip on ∞ Endless for more)"; hintBtn.style.display = "none"; return; }
   qEl.textContent = current.question;
   if (current.type === "mc") {
     current.options.forEach((opt, i) => {
@@ -30,10 +46,12 @@ async function load() {
   } else {
     const input = document.createElement("input");
     input.id = "typed"; input.placeholder = "type your answer…";
+    input.addEventListener("keydown", e => { if (e.key === "Enter") answerTyped(input.value); });
     const submit = document.createElement("button");
     submit.className = "opt"; submit.textContent = "Submit";
     submit.onclick = () => answerTyped(input.value);
     ansEl.appendChild(input); ansEl.appendChild(submit);
+    input.focus();
   }
 }
 
@@ -46,7 +64,7 @@ async function answerMc(btn, idx) {
 }
 
 async function answerTyped(value) {
-  fbEl.textContent = "checking your answer… 🍍";
+  fbEl.textContent = "checking… 🍍";
   const r = await window.papple.submitAnswer(current.id, { typedAnswer: value });
   showFeedback(r);
 }
@@ -56,15 +74,20 @@ function showFeedback(r) {
   fbEl.textContent = (r.correct ? "✅ " : "❌ ") + detail;
   hintBtn.style.display = "none";
   nextBtn.style.display = "";
+  updateProgress();
 }
 
 hintBtn.onclick = async () => {
   hintBtn.disabled = true;
-  fbEl.textContent = "💡 thinking of a hint…";
-  try { fbEl.textContent = "💡 " + await window.papple.getHint(current.id); }
-  catch { fbEl.textContent = "💡 (couldn't get a hint right now)"; }
+  fbEl.textContent = "💡 " + (await window.papple.getHint(current.id).catch(() => "(no hint available)"));
   hintBtn.style.display = "none"; // one hint per question
+  hintBtn.disabled = false;
+};
+endlessBtn.onclick = async () => {
+  const on = !endlessBtn.dataset.on;
+  setEndless(on);
+  await window.papple.saveSettings({ endlessMode: on });
 };
 nextBtn.onclick = load;
-document.getElementById("close").onclick = () => window.close();
+document.getElementById("close").onclick = () => window.papple.togglePopup();
 load();
