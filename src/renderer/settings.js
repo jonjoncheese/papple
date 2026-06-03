@@ -1,6 +1,34 @@
 const $ = id => document.getElementById(id);
+let savedApiModel = "";
 
 function applyTheme(t) { document.documentElement.dataset.theme = t; }
+
+const MODELS = {
+  gemini: [
+    ["gemini-2.5-flash", "Gemini 2.5 Flash — free + fast (recommended)"],
+    ["gemini-flash-latest", "Gemini Flash (latest)"],
+    ["gemini-2.5-pro", "Gemini 2.5 Pro — smarter, slower"]
+  ],
+  openai: [
+    ["gpt-4o-mini", "GPT-4o mini — fast + cheap"],
+    ["gpt-4o", "GPT-4o — smarter"],
+    ["gpt-4.1-mini", "GPT-4.1 mini"]
+  ],
+  claude: [
+    ["claude-haiku-4-5-20251001", "Claude Haiku 4.5 — fast + cheap"],
+    ["claude-sonnet-4-6", "Claude Sonnet 4.6 — smarter"],
+    ["claude-opus-4-8", "Claude Opus 4.8 — best, priciest"]
+  ]
+};
+
+function populateModels(mode, selected) {
+  const sel = $("apiModel");
+  sel.innerHTML = "";
+  (MODELS[mode] || []).forEach(([v, label]) => {
+    const o = document.createElement("option"); o.value = v; o.textContent = label; sel.appendChild(o);
+  });
+  if (selected && [...sel.options].some(o => o.value === selected)) sel.value = selected;
+}
 
 function updateApiRow() {
   const mode = $("aiMode").value;
@@ -10,7 +38,7 @@ function updateApiRow() {
     claude: "Key from console.anthropic.com — paid per use (needs API credits)."
   };
   if (mode === "claude-code") { $("apiRow").style.display = "none"; }
-  else { $("apiRow").style.display = ""; $("apiHelp").textContent = help[mode] || ""; }
+  else { $("apiRow").style.display = ""; $("apiHelp").textContent = help[mode] || ""; populateModels(mode, savedApiModel); }
 }
 
 async function init() {
@@ -18,7 +46,7 @@ async function init() {
   $("theme").value = s.theme || "dark"; applyTheme($("theme").value);
   $("aiMode").value = s.aiMode || "claude-code";
   $("apiKey").value = s.apiKey || "";
-  $("apiModel").value = s.apiModel || "";
+  savedApiModel = s.apiModel || "";
   $("questionsPerDay").value = s.questionsPerDay;
   $("answerMode").value = s.answerMode;
   $("endlessMode").checked = s.endlessMode !== false;
