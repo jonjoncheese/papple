@@ -76,13 +76,8 @@ export function createController(deps) {
       const g = gradeMc(q, selectedIndex);
       result = { correct: g.correct, explanation: g.explanation };
     } else {
-      let g;
-      try {
-        const provider = buildProvider(effectiveSettings(state.settings));
-        g = await provider.gradeTyped({ question: q, userAnswer: typedAnswer ?? "" });
-      } catch {
-        g = localTypedGrade(q.answer, typedAnswer);
-      }
+      // Local grading — instant, no Claude call per answer.
+      const g = localTypedGrade(q.answer, typedAnswer);
       result = { correct: g.correct, explanation: q.explanation, feedback: g.feedback };
     }
 
@@ -112,12 +107,8 @@ export function createController(deps) {
     const state = await loadState(statePath);
     const q = state.today.batch.find(x => x.id === id);
     if (!q) throw new Error(`unknown question id: ${id}`);
-    try {
-      const provider = buildProvider(effectiveSettings(state.settings));
-      return await provider.hint({ question: q, sourceText: "" });
-    } catch {
-      return `Think about the key idea behind "${q.topic}". You've got this 🍍`;
-    }
+    // Hints are pre-generated with the batch — instant, no Claude call.
+    return q.hint || `Think about the key idea behind "${q.topic}". You've got this 🍍`;
   }
 
   async function hydrationDue() {

@@ -1,4 +1,4 @@
-import { app, Tray, Menu, ipcMain } from "electron";
+import { app, Tray, Menu, ipcMain, screen } from "electron";
 import { join } from "node:path";
 import { loadState, saveState } from "../core/storage.js";
 import { generateDailyBatch } from "../core/engine.js";
@@ -39,6 +39,33 @@ function openPopup() {
   popupWin = createPopupWindow();
   popupWin.on("closed", () => { popupWin = null; });
 }
+
+// Click Papple to toggle the quiz window open/closed.
+function togglePopup() {
+  if (popupWin && !popupWin.isDestroyed()) { popupWin.destroy(); popupWin = null; return; }
+  openPopup();
+}
+
+// Papple dashes across the screen and scurries home (10-rapid-clicks easter egg).
+function runAway() {
+  if (!buddyWin || buddyWin.isDestroyed()) return;
+  const { workArea } = screen.getPrimaryDisplay();
+  const b = buddyWin.getBounds();
+  const homeX = workArea.x + workArea.width - b.width - 20;
+  const homeY = workArea.y + workArea.height - b.height - 20;
+  let t = 0;
+  const timer = setInterval(() => {
+    if (!buddyWin || buddyWin.isDestroyed()) { clearInterval(timer); return; }
+    t += 0.05;
+    if (t >= 1) { clearInterval(timer); buddyWin.setPosition(homeX, homeY); return; }
+    const x = Math.round(homeX - Math.sin(t * Math.PI) * workArea.width * 0.75);
+    const y = Math.round(homeY - Math.abs(Math.sin(t * Math.PI * 3)) * 60);
+    buddyWin.setPosition(x, y);
+  }, 25);
+}
+
+ipcMain.on("papple:togglePopup", togglePopup);
+ipcMain.on("papple:runAway", runAway);
 
 function openSettings() {
   if (settingsWin && !settingsWin.isDestroyed()) { settingsWin.focus(); return; }

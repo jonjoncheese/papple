@@ -21,7 +21,7 @@ export function buildGenerationPrompt({ deckName, sourceText, focusTopics = [], 
     focusLine,
     sourceBlock,
     `Return ONLY a JSON array. Each item must have these fields:`,
-    `id (unique string), deck ("${deckName}"), topic (short string), source ("${sourceText ? "source" : "bank"}"), type ("mc" or "typed"), question (string), explanation (string).`,
+    `id (unique string), deck ("${deckName}"), topic (short string), source ("${sourceText ? "source" : "bank"}"), type ("mc" or "typed"), question (string), explanation (string), hint (a one-sentence nudge that does NOT reveal the answer).`,
     `For type "mc": also include options (array of EXACTLY 4 strings) and answerIndex (0-3).`,
     `For type "typed": also include answer (the expected short answer string).`,
     `Quality rules: exactly ONE option must be correct and the other three clearly wrong (no "all of the above", no two correct options). Double-check that answerIndex points to the correct option. Keep questions factually accurate and at the level of the ${deckName} course. Always include a one-sentence explanation of why the answer is correct.`,
@@ -64,6 +64,7 @@ export function parseQuestionsJson(raw, deckName) {
     const q = { ...item };
     if (!q.deck) q.deck = deckName;
     if (!q.source) q.source = "ai";
+    if (!q.hint) q.hint = "Think about the core idea this question is testing.";
     // Smaller models often omit the explanation — backfill a useful default
     // so otherwise-valid questions aren't dropped.
     if (!q.explanation) {
