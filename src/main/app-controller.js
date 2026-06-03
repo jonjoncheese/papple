@@ -82,6 +82,13 @@ export function createController(deps) {
     const q = state.today.batch.find(x => x.id === id);
     if (!q) throw new Error(`unknown question id: ${id}`);
 
+    // Idempotent: a double-submit (e.g. Enter mashed twice) must NOT re-count.
+    if (state.today.progress[id]?.answered) {
+      const prior = state.today.progress[id];
+      const allAnswered = state.today.batch.every(x => state.today.progress[x.id]?.answered);
+      return { correct: !!prior.correct, explanation: q.explanation, allAnswered };
+    }
+
     let result;
     if (q.type === "mc") {
       const g = gradeMc(q, selectedIndex);
@@ -157,6 +164,7 @@ export function createController(deps) {
     const state = await loadState(statePath);
     state.today = { date: null, batch: [], progress: {} };
     state.askedRecent = [];
+    delete state.dailyScores[isoDay(now())]; // zero today's progress counter too (back to 0/N)
     await saveState(statePath, state);
     await ensureTodayBatch();
     return { ok: true };

@@ -85,3 +85,28 @@ test("endless mode OFF returns null when exhausted (done for today)", async () =
   assert.equal(q, null);
   await rm(dir, { recursive: true, force: true });
 });
+
+test("double-submitting the same question does not double-count the score", async () => {
+  const { dir, path } = await setup(s => { s.settings.questionsPerDay = 2; });
+  const ctl = createController(workingDeps(path));
+  const today = await ctl.ensureTodayBatch();
+  await ctl.submitAnswer(today.batch[0].id, { selectedIndex: 0 });
+  await ctl.submitAnswer(today.batch[0].id, { selectedIndex: 0 }); // Enter mashed twice
+  const day = "2026-06-02";
+  const state = await loadState(path);
+  assert.equal(state.dailyScores[day].total, 1); // counted ONCE, not twice
+  await rm(dir, { recursive: true, force: true });
+});
+
+test("resetQuestions wipes today's batch, memory, AND the score counter", async () => {
+  const { dir, path } = await setup(s => { s.settings.questionsPerDay = 2; });
+  const ctl = createController(workingDeps(path));
+  const today = await ctl.ensureTodayBatch();
+  await ctl.submitAnswer(today.batch[0].id, { selectedIndex: 0 });
+  await ctl.resetQuestions();
+  const state = await loadState(path);
+  assert.equal(state.dailyScores["2026-06-02"], undefined); // counter back to 0/N
+  assert.equal(state.askedRecent.length, 0);                // question memory cleared
+  assert.ok(state.today.batch.length > 0);                  // a fresh batch was regenerated
+  await rm(dir, { recursive: true, force: true });
+});

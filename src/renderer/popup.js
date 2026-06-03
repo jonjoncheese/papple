@@ -11,12 +11,17 @@ let endlessOn = false;
 
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-(async () => {
+// Re-sync settings (theme, daily count, endless) then reload the question.
+// Runs on open AND every time the quiz window is shown — so it's never stale
+// after a reset, a new day, or a settings change.
+async function refresh() {
   const s = await window.papple.getSettings().catch(() => ({}));
   if (s.theme) document.documentElement.dataset.theme = s.theme;
   qPerDay = s.questionsPerDay || 10;
   setEndless(!!s.endlessMode);
-})();
+  await load();
+}
+window.papple.onPopupReload(refresh);
 
 function setEndless(on) { endlessOn = on; endlessBtn.classList.toggle("on", on); }
 
@@ -77,6 +82,12 @@ async function renderSummary() {
   ansEl.innerHTML = '<div class="muted">crunching your results…</div>';
   fbEl.textContent = "";
   const sum = await window.papple.getSummary();
+  if (!sum.answered) {
+    qEl.textContent = "Nothing to recap yet 🍍";
+    ansEl.innerHTML = '<div class="muted">Answer a few questions and your recap shows up here.</div>';
+    fbEl.textContent = ""; hintBtn.style.display = "none"; nextBtn.style.display = "";
+    return;
+  }
   const pct = sum.answered ? Math.round(sum.correct / sum.answered * 100) : 0;
   let html = '<div class="recap">';
   html += `<div class="score">You got <b>${sum.correct} / ${sum.answered}</b> right — ${pct}% ${pct >= 80 ? "🎉" : pct >= 50 ? "🍍" : "💪"}</div>`;
@@ -112,6 +123,10 @@ async function answerMc(btn, idx) {
 }
 
 async function answerTyped(value) {
+  if (!String(value ?? "").trim()) { fbEl.textContent = "type an answer first 🍍"; return; }
+  const input = document.getElementById("typed");
+  if (input) input.disabled = true;                                  // no double-submit on Enter mash
+  [...ansEl.querySelectorAll("button")].forEach(b => b.disabled = true);
   fbEl.textContent = "checking… 🍍";
   const r = await window.papple.submitAnswer(current.id, { typedAnswer: value });
   showFeedback(r);
@@ -141,4 +156,4 @@ endlessBtn.onclick = async () => {
 };
 nextBtn.onclick = load;
 document.getElementById("close").onclick = () => window.papple.togglePopup();
-load();
+refresh();

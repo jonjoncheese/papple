@@ -22,5 +22,6 @@ contextBridge.exposeInMainWorld("papple", {
   throwAway: (v) => ipcRenderer.send("papple:throw", v),
   savePos: (pos) => ipcRenderer.send("papple:savePos", pos),
   onGenStatus: (cb) => ipcRenderer.on("papple:genStatus", (_e, s) => cb(s)),
-  onHydrate: (cb) => ipcRenderer.on("papple:hydrate", () => cb())
+  onHydrate: (cb) => ipcRenderer.on("papple:hydrate", () => cb()),
+  onPopupReload: (cb) => ipcRenderer.on("papple:reload", () => cb())
 });

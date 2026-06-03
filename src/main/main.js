@@ -80,17 +80,24 @@ function ensurePopupWindow() {
   return popupWin;
 }
 
+// Tell the (already-loaded) quiz window to re-sync + reload — so it's never
+// stale after a reset, a day rollover, or being reopened.
+function refreshPopupContent() {
+  if (popupWin && !popupWin.isDestroyed()) popupWin.webContents.send("papple:reload");
+}
+
 function openPopup() {
   const win = ensurePopupWindow();
   win.show();
   win.focus();
+  refreshPopupContent();
 }
 
 // Click Papple to toggle the quiz window — hides it (keeps it loaded), not destroys.
 function togglePopup() {
   const win = ensurePopupWindow();
   if (win.isVisible()) win.hide();
-  else { win.show(); win.focus(); }
+  else { win.show(); win.focus(); refreshPopupContent(); }
 }
 
 // Papple dashes across the screen and scurries home (10-rapid-clicks easter egg).
@@ -199,7 +206,7 @@ app.whenReady().then(async () => {
     isHydrationDue, isQuietHours, nextUnanswered
   });
 
-  registerIpc({ controller, statePathStr: sp, sourcesDir, openSettings, openPopup });
+  registerIpc({ controller, statePathStr: sp, sourcesDir, openSettings, openPopup, refreshPopup: refreshPopupContent });
 
   buddyWin = createBuddyWindow();
 
