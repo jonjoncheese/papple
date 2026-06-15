@@ -8,7 +8,7 @@ Drop your class notes and PDFs into folders, pick an AI, and Papple turns them i
 
 It's a desktop app (Electron), it runs locally, and your notes never leave your machine except as prompts to whichever AI you choose.
 
-> _Screenshot / GIF goes here. (Drop a short clip of a quiz + the recap graph.)_
+![Papple waving, the settings window, and Papple sleeping](docs/demo.gif)
 
 ## What it does
 
