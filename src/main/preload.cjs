@@ -23,5 +23,9 @@ contextBridge.exposeInMainWorld("papple", {
   savePos: (pos) => ipcRenderer.send("papple:savePos", pos),
   onGenStatus: (cb) => ipcRenderer.on("papple:genStatus", (_e, s) => cb(s)),
   onHydrate: (cb) => ipcRenderer.on("papple:hydrate", () => cb()),
-  onPopupReload: (cb) => ipcRenderer.on("papple:reload", () => cb())
+  onPopupReload: (cb) => ipcRenderer.on("papple:reload", () => cb()),
+  onHandoffStart: (cb) => ipcRenderer.on("papple:handoffStart", (_e, payload) => cb(payload)),
+  handoffSubmit: (raw) => ipcRenderer.invoke("papple:handoffSubmit", raw),
+  handoffCancel: () => ipcRenderer.invoke("papple:handoffCancel"),
+  handoffCopyAgain: (prompt) => ipcRenderer.invoke("papple:handoffCopyAgain", prompt)
 });

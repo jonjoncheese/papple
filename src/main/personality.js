@@ -6,6 +6,8 @@ const VOICE = {
   pdfFail:      { face: "squint", lines: ["I can't read that file — looks like a scanned image. Save it as a text PDF or drop a .md and I'll get it!"] },
   emptySources: { face: "hungry", lines: ["feed me notes! Drop PDFs in your papple-sources folder 🍍"] },
   ollamaDown:   { face: "hardhat",lines: ["local-brain mode needs Ollama running — start it, or switch me to Claude in Settings"] },
+  handoffWait:  { face: "peek",   lines: ["prompt copied! paste it into your AI tab, then paste the JSON reply back to me 🍍"] },
+  handoffBad:   { face: "squint", lines: ["that paste didn't look like a question list — copy the WHOLE JSON array from the AI and try again"] },
   correct:      { face: "happy",  lines: ["Yesss! 🍍✨", "nailed it!", "ooh you *know* this"] },
   wrong:        { face: "droop",  lines: ["aw, so close! here's the trick:"] },
   perfect:      { face: "party",  lines: ["PERFECT. I'm so proud I could sprout 🎉"] },

@@ -33,3 +33,13 @@ test("aiMode 'openai' hits the OpenAI endpoint with a bearer token", async () =>
 test("unknown aiMode throws", () => {
   assert.throws(() => buildProvider({ aiMode: "nope" }, { fetchImpl: async () => ({}) }), /unknown ai mode/i);
 });
+
+test("aiMode 'prompt-handoff' routes through the injected handoff", async () => {
+  let got = "";
+  const p = buildProvider({ aiMode: "prompt-handoff", handoffSite: "claude" }, {
+    handoff: async (prompt) => { got = prompt; return "[]"; }
+  });
+  await p.complete("QUIZ ME");
+  assert.match(got, /QUIZ ME/);
+  assert.match(got, /JSON array/i);
+});

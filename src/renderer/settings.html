@@ -7,11 +7,23 @@
     <h2>AI brain</h2>
     <label class="field-label" for="aiMode">How Papple makes your questions</label>
     <select id="aiMode">
-      <option value="claude-code">Claude login — free, no key (slower)</option>
-      <option value="gemini">Gemini key — free + fast ⚡ (recommended)</option>
+      <option value="prompt-handoff">No API key — paste into ChatGPT / Claude / Gemini (recommended for most people)</option>
+      <option value="claude-code">Claude login — free, no key (needs Claude Code CLI)</option>
+      <option value="gemini">Gemini key — free + fast ⚡</option>
       <option value="openai">OpenAI key — fast (paid)</option>
       <option value="claude">Claude key — fast (paid)</option>
     </select>
+    <div id="handoffRow" hidden>
+      <label class="field-label" for="handoffSite">Which AI site should I open?</label>
+      <select id="handoffSite">
+        <option value="chatgpt">ChatGPT</option>
+        <option value="claude">Claude</option>
+        <option value="gemini">Gemini</option>
+      </select>
+      <small class="help">Papple copies a prompt, opens that site, and you paste the JSON reply back. No key, no server.</small>
+      <button id="generateBtn" class="btn primary" style="margin-top:10px">Generate questions 🍍</button>
+      <span id="generateStatus"></span>
+    </div>
     <div id="apiRow">
       <label class="field-label" for="apiKey">API key</label>
       <input id="apiKey" type="password" placeholder="paste your key…">

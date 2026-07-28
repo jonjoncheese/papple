@@ -15,9 +15,10 @@ export function defaultState() {
       quietStartHour: 22,
       quietEndHour: 7,
       hydration: { enabled: true, intervalMin: 90 },
-      aiMode: "claude-code",
+      aiMode: "prompt-handoff",
       apiKey: "",
       apiModel: "",
+      handoffSite: "chatgpt",
       sourcesDir: ""
     },
     streak: { count: 0, lastCompletedDate: null },

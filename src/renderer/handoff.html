@@ -1,0 +1,30 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="theme.css"><link rel="stylesheet" href="handoff.css"><title>Papple — paste questions</title></head>
+<body>
+  <div class="wrap">
+    <img src="papple-wave.png" alt="Papple" class="pap">
+    <h1>prompt copied 🍍</h1>
+    <p class="lead">I put a big prompt on your clipboard and opened <b id="siteLabel">your AI</b>. Paste it there, wait for the JSON array, then paste that reply below.</p>
+
+    <ol class="steps">
+      <li>Paste into <span id="siteLabel2">the chat</span> (<kbd>Ctrl</kbd>+<kbd>V</kbd>)</li>
+      <li>Wait for the model to reply with a JSON array</li>
+      <li>Copy that reply and paste it in the box below</li>
+    </ol>
+
+    <div class="row">
+      <button id="copyAgain" class="btn ghost">📋 Copy prompt again</button>
+      <button id="reopen" class="btn ghost">↗ Re-open site</button>
+    </div>
+
+    <label class="field-label" for="reply">Paste the AI's reply here</label>
+    <textarea id="reply" rows="12" placeholder='[{"id":"…","deck":"…","type":"mc",…}, …]'></textarea>
+    <p id="err" class="err" hidden></p>
+
+    <div class="row end">
+      <button id="cancel" class="btn ghost">Cancel</button>
+      <button id="submit" class="btn primary">Generate from paste 🍍</button>
+    </div>
+  </div>
+  <script src="handoff.js"></script>
+</body></html>

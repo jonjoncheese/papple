@@ -35,12 +35,13 @@ Each folder becomes a subject. Papple builds one prompt across your active decks
 
 Papple is provider-agnostic. Set this in Settings:
 
-- **Gemini API key** — free tier, fast. Good default if you don't mind grabbing a key.
-- **Claude login (claude-code)** — no key needed, free, but slower to start (needs the Claude Code CLI installed and logged in).
+- **No API key (prompt handoff)** — recommended for most people. Papple copies a prompt, opens ChatGPT / Claude / Gemini (your pick), and you paste the JSON reply back. No key, no server.
+- **Gemini API key** — free tier, fast.
+- **Claude login (claude-code)** — no key needed, free, but needs the Claude Code CLI installed and logged in.
 - **OpenAI API key** — fast, paid per use.
 - **Claude API key** — fast, paid per use.
 
-You bring your own key (or login). Nothing is hardcoded.
+You bring your own key (or login), or use the paste-handoff path. Nothing is hardcoded.
 
 ## Run it
 
@@ -80,7 +81,7 @@ Outputs land in `dist/` (`*-Setup.exe`, `*-portable.exe`, and `win-unpacked/`).
 npm test
 ```
 
-Around 100 tests covering the core logic (question generation, grading, streaks, scheduling, providers, packaged paths). The whole `src/core/` library is pure and Electron-free, so it's all testable without launching the app.
+Around 108 tests covering the core logic (question generation, grading, streaks, scheduling, providers, packaged paths, prompt-handoff). The whole `src/core/` library is pure and Electron-free, so it's all testable without launching the app.
 
 ## Privacy
 

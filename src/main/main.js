@@ -13,6 +13,7 @@ import { parsePdf } from "./pdf.js";
 import { statePath, defaultSourcesDir, rendererDir } from "./paths.js";
 import { registerIpc } from "./ipc.js";
 import { createBuddyWindow, createPopupWindow, createSettingsWindow, createOnboardingWindow } from "./windows.js";
+import { runPromptHandoff } from "./prompt-handoff.js";
 
 let buddyWin, popupWin, settingsWin, onboardingWin, tray;
 let controller, statePathStr; // assigned in whenReady; used by module-level IPC handlers
@@ -201,7 +202,10 @@ app.whenReady().then(async () => {
       return loadActiveDecks(st.settings.sourcesDir || sourcesDir, activeDecks,
         { pdfParser: parsePdf, onSkip: (n, e) => console.warn("skip", n, e.message) });
     },
-    buildProvider: (settings) => buildProvider(settings, { fetchImpl: globalThis.fetch }),
+    buildProvider: (settings) => buildProvider(settings, {
+      fetchImpl: globalThis.fetch,
+      handoff: (prompt) => runPromptHandoff(prompt, { siteId: settings.handoffSite || "chatgpt" })
+    }),
     generateCombinedBatch, gradeMc, recordCompletion, recordAnswer,
     isHydrationDue, isQuietHours, nextUnanswered
   });

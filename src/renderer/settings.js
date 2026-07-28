@@ -37,8 +37,11 @@ function updateApiRow() {
     openai: "Key from platform.openai.com — paid per use.",
     claude: "Key from console.anthropic.com — paid per use (needs API credits)."
   };
-  if (mode === "claude-code") { $("apiRow").style.display = "none"; }
-  else { $("apiRow").style.display = ""; $("apiHelp").textContent = help[mode] || ""; populateModels(mode, savedApiModel); }
+  const handoff = mode === "prompt-handoff";
+  const needsKey = mode === "gemini" || mode === "openai" || mode === "claude";
+  $("handoffRow").hidden = !handoff;
+  if (mode === "claude-code" || handoff) { $("apiRow").style.display = "none"; }
+  else { $("apiRow").style.display = needsKey ? "" : "none"; $("apiHelp").textContent = help[mode] || ""; populateModels(mode, savedApiModel); }
 }
 
 async function init() {
@@ -47,6 +50,7 @@ async function init() {
   $("aiMode").value = s.aiMode || "claude-code";
   $("apiKey").value = s.apiKey || "";
   savedApiModel = s.apiModel || "";
+  $("handoffSite").value = s.handoffSite || "chatgpt";
   $("questionsPerDay").value = s.questionsPerDay;
   $("answerMode").value = s.answerMode;
   $("endlessMode").checked = s.endlessMode !== false;
@@ -81,6 +85,24 @@ $("resetQ").onclick = async () => {
   setTimeout(() => $("resetStatus").textContent = "", 3000);
 };
 
+$("generateBtn").onclick = async () => {
+  // Save handoff settings first so the shell opens the right site
+  await window.papple.saveSettings({
+    aiMode: "prompt-handoff",
+    handoffSite: $("handoffSite").value
+  });
+  $("generateBtn").disabled = true;
+  $("generateStatus").textContent = "prompt copied — paste the AI reply in the Papple window…";
+  try {
+    await window.papple.resetQuestions();
+    $("generateStatus").textContent = "questions ready ✓";
+  } catch (e) {
+    $("generateStatus").textContent = "failed: " + (e && e.message ? e.message : "error");
+  }
+  $("generateBtn").disabled = false;
+  setTimeout(() => $("generateStatus").textContent = "", 4000);
+};
+
 $("save").onclick = async () => {
   const decks = [...document.querySelectorAll("#decks input:checked")].map(c => c.value);
   await window.papple.saveSettings({
@@ -88,6 +110,7 @@ $("save").onclick = async () => {
     aiMode: $("aiMode").value,
     apiKey: $("apiKey").value,
     apiModel: $("apiModel").value,
+    handoffSite: $("handoffSite").value,
     questionsPerDay: Number($("questionsPerDay").value),
     answerMode: $("answerMode").value,
     endlessMode: $("endlessMode").checked,
