@@ -34,7 +34,7 @@ function openOnboarding() {
 
 ipcMain.on("papple:openSourcesFolder", async () => {
   const st = await loadState(statePath(app));
-  shell.openPath(st.settings.sourcesDir || defaultSourcesDir());
+  shell.openPath(st.settings.sourcesDir || defaultSourcesDir(app));
 });
 
 ipcMain.handle("papple:pickFolder", async () => {
@@ -46,7 +46,7 @@ ipcMain.handle("papple:finishOnboarding", async (_e, opts = {}) => {
   const sp = statePath(app);
   const st = await loadState(sp);
   if (opts.folder) st.settings.sourcesDir = opts.folder;
-  if (!st.settings.sourcesDir) st.settings.sourcesDir = defaultSourcesDir();
+  if (!st.settings.sourcesDir) st.settings.sourcesDir = defaultSourcesDir(app);
   st.settings.onboarded = true;
   await saveState(sp, st);
   if (onboardingWin && !onboardingWin.isDestroyed()) onboardingWin.close();
@@ -58,7 +58,7 @@ async function ensureSourcesDir() {
   const sp = statePath(app);
   const state = await loadState(sp);
   if (!state.settings.sourcesDir) {
-    state.settings.sourcesDir = defaultSourcesDir();
+    state.settings.sourcesDir = defaultSourcesDir(app);
     await saveState(sp, state);
   }
   return state.settings.sourcesDir;

@@ -1,18 +1,80 @@
 {
   "name": "papple",
   "version": "0.1.0",
-  "private": true,
+  "description": "A tiny pixel pineapple that quizzes you on your schoolwork",
+  "author": "jonjoncheese",
+  "private": false,
   "license": "AGPL-3.0-only",
+  "homepage": "https://github.com/jonjoncheese/papple",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jonjoncheese/papple.git"
+  },
   "type": "module",
   "main": "src/main/main.js",
   "scripts": {
     "test": "node --test \"test/**/*.test.js\"",
-    "start": "electron ."
+    "start": "electron .",
+    "icon": "node scripts/make-icon.mjs",
+    "dist": "npm run icon && electron-builder --win",
+    "dist:dir": "npm run icon && electron-builder --win --dir",
+    "verify:packaged": "node scripts/verify-packaged.mjs"
   },
   "dependencies": {
     "pdf-parse": "^1.1.1"
   },
   "devDependencies": {
-    "electron": "^42.3.2"
+    "electron": "^42.3.2",
+    "electron-builder": "^26.0.12",
+    "png-to-ico": "^3.0.1"
+  },
+  "build": {
+    "appId": "com.jonjoncheese.papple",
+    "productName": "Papple",
+    "copyright": "Copyright © jonjoncheese",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json",
+      "LICENSE"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "**/node_modules/pdf-parse/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "${productName}-${version}-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Papple",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "license": "LICENSE"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    }
   }
 }

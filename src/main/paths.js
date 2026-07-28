@@ -8,7 +8,11 @@ export function statePath(app) {
   return join(app.getPath("userData"), "papple-state.json");
 }
 
-export function defaultSourcesDir() {
+// Dev: repo's papple-sources/. Packaged: Documents/PappleSources (writable, outside asar).
+export function defaultSourcesDir(app) {
+  if (app?.isPackaged) {
+    return join(app.getPath("documents"), "PappleSources");
+  }
   return join(projectRoot, "papple-sources");
 }
 
