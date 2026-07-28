@@ -204,7 +204,10 @@ app.whenReady().then(async () => {
     },
     buildProvider: (settings) => buildProvider(settings, {
       fetchImpl: globalThis.fetch,
-      handoff: (prompt) => runPromptHandoff(prompt, { siteId: settings.handoffSite || "chatgpt" })
+      handoff: async (prompt) => {
+        if (buddyWin && !buddyWin.isDestroyed()) buddyWin.webContents.send("papple:genStatus", "handoff");
+        return runPromptHandoff(prompt, { siteId: settings.handoffSite || "chatgpt" });
+      }
     }),
     generateCombinedBatch, gradeMc, recordCompletion, recordAnswer,
     isHydrationDue, isQuietHours, nextUnanswered

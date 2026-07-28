@@ -131,7 +131,8 @@ window.papple.onHydrate(() => drinkWater());
 let genDone = false;
 window.papple.onGenStatus((s) => {
   if (s === "ready") { genDone = true; if (!sleeping) say("today's questions are ready — click me! 🍍", 5000); }
-  else if (s === "error") { genDone = true; say("couldn't load questions — check Settings 🍍", 8000); }
+  else if (s === "handoff") { say("prompt copied! paste it into your AI tab, then paste the JSON reply back to me 🍍", 999999); }
+  else if (s === "error") { genDone = true; say("couldn't load questions — open Settings, pick an AI (or No-key paste), and hit Generate 🍍", 8000); }
 });
 
 // --- launch: wave hello ---

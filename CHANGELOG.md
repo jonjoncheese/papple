@@ -2,6 +2,15 @@
 
 All notable changes to Papple are documented here.
 
+## [1.1.0] — 2026-07-28
+
+### Added
+- **No-key prompt-handoff provider** — copy an ever-growing quiz prompt, open ChatGPT / Claude / Gemini (user picks), paste the JSON reply back. Default mode for new installs. No API key, no server.
+- Handoff paste window + Settings "Generate questions" button + buddy status line while waiting
+
+### Tests
+- 108 passing (was 100 at 1.0.0)
+
 ## [1.0.0] — 2026-07-28
 
 First downloadable Windows release.
@@ -21,7 +30,7 @@ First downloadable Windows release.
 - Pixel sprites (papple / wave / blink / sleep / drink), draggable + throwable buddy + tray
 - Hydration reminders, PDF parsing wired into deck loading
 - Providers: Gemini, Claude Code, OpenAI, Claude API
-- Core library Electron-free and unit-tested (~100 tests at 1.0.0)
+- Core library Electron-free and unit-tested
 
 ## [0.1.0] — 2026-06-15
 
