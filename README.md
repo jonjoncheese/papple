@@ -36,7 +36,7 @@ Each folder becomes a subject. Papple builds one prompt across your active decks
 Papple is provider-agnostic. Set this in Settings:
 
 - **Gemini API key** — free tier, fast. Good default if you don't mind grabbing a key.
-- **Claude login (claude-code)** — no key needed, free, but slower to start.
+- **Claude login (claude-code)** — no key needed, free, but slower to start (needs the Claude Code CLI installed and logged in).
 - **OpenAI API key** — fast, paid per use.
 - **Claude API key** — fast, paid per use.
 
@@ -44,7 +44,20 @@ You bring your own key (or login). Nothing is hardcoded.
 
 ## Run it
 
-Papple isn't packaged into an installer yet, so for now you run it from source. You'll need Node 24+.
+### Download (recommended)
+
+Grab the latest Windows build from [Releases](https://github.com/jonjoncheese/papple/releases):
+
+- **Papple-*-Setup.exe** — NSIS installer (Start Menu + optional desktop shortcut)
+- **Papple-*-portable.exe** — single-file portable, no install
+
+First launch walks you through picking your sources folder and your AI.
+
+**Windows SmartScreen warning:** Papple is open-source and the Windows builds are **not code-signed** (no paid certificate). The first time you run the installer or portable exe, SmartScreen will likely say "Windows protected your PC." Click **More info** → **Run anyway**. That warning is about the missing signature, not malware.
+
+### Build from source
+
+You'll need Node 24+.
 
 ```bash
 git clone https://github.com/jonjoncheese/papple.git
@@ -53,7 +66,13 @@ npm install
 npm start
 ```
 
-First launch walks you through picking your sources folder and your AI.
+To package Windows installers yourself:
+
+```bash
+npm run dist
+```
+
+Outputs land in `dist/` (`*-Setup.exe`, `*-portable.exe`, and `win-unpacked/`).
 
 ## Tests
 
@@ -61,11 +80,11 @@ First launch walks you through picking your sources folder and your AI.
 npm test
 ```
 
-Around 96 tests covering the core logic (question generation, grading, streaks, scheduling, providers). The whole `src/core/` library is pure and Electron-free, so it's all testable without launching the app.
+Around 100 tests covering the core logic (question generation, grading, streaks, scheduling, providers, packaged paths). The whole `src/core/` library is pure and Electron-free, so it's all testable without launching the app.
 
 ## Privacy
 
-Your settings and progress live in a local JSON file (`%APPDATA%/papple` on Windows). Your notes stay on disk. The only thing that goes out is the text Papple sends to the AI you picked, using your own key or login.
+Your settings and progress live in a local JSON file (`%APPDATA%/papple/papple-state.json` on Windows). Your notes stay on disk. The only thing that goes out is the text Papple sends to the AI you picked, using your own key or login.
 
 ## License
 
@@ -73,4 +92,4 @@ Your settings and progress live in a local JSON file (`%APPDATA%/papple` on Wind
 
 ## Status
 
-Early and built solo. I use it daily for my own classes. Feedback and issues welcome.
+Early and built solo. I use it daily for my own classes. Feedback and issues welcome. See [CHANGELOG.md](CHANGELOG.md) for release notes.
